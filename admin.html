@@ -32,27 +32,48 @@
   body{ font-family:'Inter',sans-serif; background:#F5F7FA; }
   .font-display{ font-family:'Manrope',sans-serif; }
   [x-cloak]{ display:none !important; }
-  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar{ width:6px; height:6px; }
   ::-webkit-scrollbar-thumb{ background:#D6DFE9; border-radius:8px; }
   .navlink.active{ background:#0E8478; color:white; }
   .navlink.active i{ color:white; }
+  .touch-scrolling { -webkit-overflow-scrolling: touch; }
 </style>
 </head>
-<body class="text-navy-600" x-data="dash()">
+<body class="text-navy-600 antialiased" x-data="dash()">
 
-<div class="flex min-h-screen">
+<!-- Overlay untuk Sidebar Mobile -->
+<div x-show="sidebarOpen" 
+     x-transition:enter="transition-opacity ease-linear duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity ease-linear duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @click="sidebarOpen = false" 
+     class="fixed inset-0 bg-navy-900/60 backdrop-blur-sm z-40 lg:hidden" x-cloak></div>
+
+<div class="flex min-h-screen relative">
 
   <!-- ============ SIDEBAR ============ -->
-  <aside class="w-64 shrink-0 bg-navy-700 text-white flex flex-col fixed h-screen z-30">
-    <div class="px-5 pt-6 pb-5 flex items-center gap-2.5 border-b border-white/10">
-      <div class="w-9 h-9 rounded-lg bg-teal-500 flex items-center justify-center"><i class="fa-solid fa-heart text-white text-sm"></i></div>
-      <div>
-        <p class="font-display font-extrabold text-sm leading-tight">RUAS Admin</p>
-        <p class="text-[10px] text-navy-300">Program Jayapura</p>
+  <aside class="w-64 shrink-0 bg-navy-700 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0"
+         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+    
+    <!-- Sidebar Header & Close Button Mobile -->
+    <div class="px-5 pt-5 pb-4 flex items-center justify-between border-b border-white/10">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-teal-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-heart text-white text-sm"></i></div>
+        <div>
+          <p class="font-display font-extrabold text-sm leading-tight">RUAS Admin</p>
+          <p class="text-[10px] text-navy-300">Program Jayapura</p>
+        </div>
       </div>
+      <button @click="sidebarOpen = false" class="lg:hidden text-navy-300 hover:text-white p-1">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
     </div>
 
-    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto touch-scrolling">
       <p class="text-[10px] font-bold text-navy-300 uppercase tracking-wider px-3 pt-2 pb-1.5">Operasional</p>
       <template x-for="item in [
         {id:'dashboard', icon:'fa-gauge-high', label:'Ringkasan'},
@@ -60,7 +81,7 @@
         {id:'consult', icon:'fa-comments', label:'Antrean Konsultasi', badge: consultQueue.filter(c=>c.status==='Menunggu').length},
         {id:'referrals', icon:'fa-hospital', label:'Fasilitas Rujukan'},
       ]">
-        <button @click="tab=item.id" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5"
+        <button @click="tab=item.id; sidebarOpen=false" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5 transition-colors"
           :class="tab===item.id && 'active'">
           <i :class="'fa-solid '+item.icon+' w-4 text-xs'"></i>
           <span class="flex-1 text-left" x-text="item.label"></span>
@@ -74,7 +95,7 @@
         {id:'users', icon:'fa-users', label:'Pengguna (Pseudonim)'},
         {id:'audit', icon:'fa-file-shield', label:'Jejak Akses'},
       ]">
-        <button @click="tab=item.id" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5"
+        <button @click="tab=item.id; sidebarOpen=false" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5 transition-colors"
           :class="tab===item.id && 'active'">
           <i :class="'fa-solid '+item.icon+' w-4 text-xs'"></i>
           <span class="flex-1 text-left" x-text="item.label"></span>
@@ -82,139 +103,171 @@
       </template>
 
       <p class="text-[10px] font-bold text-navy-300 uppercase tracking-wider px-3 pt-4 pb-1.5">Lainnya</p>
-      <button @click="tab='reports'" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5" :class="tab==='reports' && 'active'">
+      <button @click="tab='reports'; sidebarOpen=false" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5 transition-colors" :class="tab==='reports' && 'active'">
         <i class="fa-solid fa-chart-line w-4 text-xs"></i><span class="flex-1 text-left">Laporan &amp; Cascade</span>
       </button>
-      <button @click="tab='settings'" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5" :class="tab==='settings' && 'active'">
+      <button @click="tab='settings'; sidebarOpen=false" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5 transition-colors" :class="tab==='settings' && 'active'">
         <i class="fa-solid fa-gear w-4 text-xs"></i><span class="flex-1 text-left">Pengaturan</span>
       </button>
     </nav>
 
-    <div class="px-4 py-4 border-t border-white/10 flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-xs font-bold">DN</div>
+    <!-- Sidebar Footer Profile -->
+    <div class="px-4 py-4 border-t border-white/10 flex items-center gap-2.5 bg-navy-800/40">
+      <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-xs font-bold shrink-0">DN</div>
       <div class="flex-1 min-w-0">
         <p class="text-xs font-semibold truncate">Dinda N.</p>
-        <p class="text-[10px] text-navy-300">Koordinator Program</p>
+        <p class="text-[10px] text-navy-300 truncate">Koordinator Program</p>
       </div>
-      <button title="Keluar" class="hover:text-white transition"><i class="fa-solid fa-arrow-right-from-bracket text-navy-300 text-xs"></i></button>
+      <button title="Keluar" class="hover:text-white transition p-1"><i class="fa-solid fa-arrow-right-from-bracket text-navy-300 text-xs"></i></button>
     </div>
   </aside>
 
   <!-- ============ MAIN ============ -->
-  <div class="flex-1 ml-64">
+  <div class="flex-1 lg:ml-64 w-full min-w-0 flex flex-col min-h-screen">
 
     <!-- Topbar -->
-    <header class="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-8 sticky top-0 z-20">
-      <div>
-        <h1 class="font-display font-bold text-lg text-navy capitalize" x-text="titles[tab]"></h1>
+    <header class="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-20 shadow-sm">
+      <div class="flex items-center gap-3">
+        <!-- Hamburger Menu Mobile -->
+        <button @click="sidebarOpen = true" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-navy-100 text-navy-600 hover:bg-canvas">
+          <i class="fa-solid fa-bars text-sm"></i>
+        </button>
+        <h1 class="font-display font-bold text-base sm:text-lg text-navy capitalize truncate max-w-[180px] sm:max-w-none" x-text="titles[tab]"></h1>
       </div>
-      <div class="flex items-center gap-4">
+      
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Desktop Search -->
         <div class="relative hidden md:block">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-navy-300 text-xs"></i>
-          <input type="text" x-model="searchQuery" placeholder="Cari kode, fasilitas, nama..." class="bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500 w-64">
+          <input type="text" x-model="searchQuery" placeholder="Cari kode, fasilitas, nama..." class="bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500 w-52 lg:w-64">
         </div>
-        <button class="relative w-9 h-9 rounded-lg bg-canvas flex items-center justify-center"><i class="fa-regular fa-bell text-navy-400 text-sm"></i>
+        
+        <!-- Toggle Search Bar Mobile -->
+        <button @click="mobileSearchOpen = !mobileSearchOpen" class="md:hidden w-9 h-9 rounded-lg bg-canvas border border-navy-100 flex items-center justify-center text-navy-400">
+          <i class="fa-solid" :class="mobileSearchOpen ? 'fa-xmark' : 'fa-magnifying-glass'"></i>
+        </button>
+
+        <button class="relative w-9 h-9 rounded-lg bg-canvas border border-navy-100 flex items-center justify-center"><i class="fa-regular fa-bell text-navy-400 text-sm"></i>
           <span class="absolute -top-1 -right-1 w-4 h-4 bg-coral-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">3</span>
         </button>
       </div>
     </header>
 
-    <main class="p-8">
+    <!-- Expandable Search Input (Mobile Only) -->
+    <div x-show="mobileSearchOpen" x-transition class="md:hidden bg-white border-b border-navy-100 px-4 py-3 sticky top-16 z-10">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-navy-300 text-xs"></i>
+        <input type="text" x-model="searchQuery" placeholder="Cari kode, fasilitas, nama..." class="w-full bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500">
+      </div>
+    </div>
+
+    <main class="p-4 sm:p-6 lg:p-8 flex-1">
 
       <!-- ============ RINGKASAN / DASHBOARD ============ -->
       <template x-if="tab==='dashboard'">
-        <div class="space-y-6" x-cloak>
+        <div class="space-y-4 sm:space-y-6" x-cloak>
 
           <!-- Urgent alert -->
-          <div class="bg-coral-50 border border-coral-100 rounded-xl px-5 py-3.5 flex items-center gap-3">
-            <i class="fa-solid fa-triangle-exclamation text-coral-500"></i>
-            <p class="text-sm text-coral-600 flex-1"><span class="font-semibold">2 kasus</span> ditandai jalur darurat (risiko kekerasan/krisis) dalam 24 jam terakhir — identitas tetap anonim, perlu tindak lanjut fasilitas.</p>
-            <button @click="tab='consult'" class="text-xs font-semibold text-coral-600 underline underline-offset-2 shrink-0">Lihat</button>
+          <div class="bg-coral-50 border border-coral-100 rounded-xl px-4 py-3.5 sm:px-5 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-triangle-exclamation text-coral-500 text-base shrink-0"></i>
+              <p class="text-xs sm:text-sm text-coral-600 flex-1"><span class="font-semibold">2 kasus</span> ditandai jalur darurat (risiko kekerasan/krisis) dalam 24 jam terakhir — identitas tetap anonim, perlu tindak lanjut fasilitas.</p>
+            </div>
+            <button @click="tab='consult'" class="text-xs font-semibold text-coral-600 underline underline-offset-2 shrink-0 self-end sm:self-auto">Lihat Kasus</button>
           </div>
 
           <!-- KPI cards -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <template x-for="k in kpis" :key="k.label">
-              <div class="bg-white rounded-xl border border-navy-100 p-4">
+              <div class="bg-white rounded-xl border border-navy-100 p-3.5 sm:p-4">
                 <div class="flex items-center justify-between mb-2">
-                  <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="k.bg"><i :class="'fa-solid '+k.icon+' text-xs '+k.color"></i></div>
-                  <span class="text-[11px] font-semibold flex items-center gap-1" :class="k.up ? 'text-teal-600' : 'text-coral-500'">
+                  <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" :class="k.bg"><i :class="'fa-solid '+k.icon+' text-xs '+k.color"></i></div>
+                  <span class="text-[10px] sm:text-[11px] font-semibold flex items-center gap-1" :class="k.up ? 'text-teal-600' : 'text-coral-500'">
                     <i :class="'fa-solid '+(k.up?'fa-arrow-up':'fa-arrow-down')+' text-[9px]'"></i><span x-text="k.delta"></span>
                   </span>
                 </div>
-                <p class="font-display font-extrabold text-2xl text-navy" x-text="k.value"></p>
-                <p class="text-xs text-navy-400 mt-0.5" x-text="k.label"></p>
+                <p class="font-display font-extrabold text-xl sm:text-2xl text-navy" x-text="k.value"></p>
+                <p class="text-[11px] sm:text-xs text-navy-400 mt-0.5 leading-snug" x-text="k.label"></p>
               </div>
             </template>
           </div>
 
           <!-- Cascade + trend -->
           <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 p-5">
+            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 p-4 sm:p-5">
               <div class="flex items-center justify-between mb-4">
                 <p class="font-display font-bold text-sm text-navy">HIV Care Cascade — alur pengguna</p>
-                <span class="text-[11px] text-navy-300">30 hari terakhir</span>
+                <span class="text-[10px] sm:text-[11px] text-navy-300">30 hari terakhir</span>
               </div>
               <div class="space-y-2.5">
                 <template x-for="(s,i) in cascade" :key="s.label">
                   <div>
                     <div class="flex items-center justify-between text-xs mb-1">
-                      <span class="font-semibold text-navy flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-navy-50 text-navy-500 text-[10px] flex items-center justify-center font-bold" x-text="i+1"></span>
-                        <span x-text="s.label"></span>
+                      <span class="font-semibold text-navy flex items-center gap-1.5 sm:gap-2">
+                        <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-navy-50 text-navy-500 text-[9px] sm:text-[10px] flex items-center justify-center font-bold" x-text="i+1"></span>
+                        <span class="truncate max-w-[150px] sm:max-w-none" x-text="s.label"></span>
                       </span>
-                      <span class="text-navy-400" x-text="s.value.toLocaleString('id-ID')+' pengguna'"></span>
+                      <span class="text-navy-400 text-[11px]" x-text="s.value.toLocaleString('id-ID')+' user'"></span>
                     </div>
                     <div class="w-full h-2.5 bg-canvas rounded-full overflow-hidden">
-                      <div class="h-full rounded-full" :class="i===0?'bg-navy':i===1?'bg-navy-400':i===2?'bg-teal-400':i===3?'bg-teal-500':i===4?'bg-teal-600':'bg-coral-500'" :style="'width:'+(s.value/cascade[0].value*100)+'%'"></div>
+                      <div class="h-full rounded-full transition-all duration-500" :class="i===0?'bg-navy':i===1?'bg-navy-400':i===2?'bg-teal-400':i===3?'bg-teal-500':i===4?'bg-teal-600':'bg-coral-500'" :style="'width:'+(s.value/cascade[0].value*100)+'%'"></div>
                     </div>
                   </div>
                 </template>
               </div>
             </div>
 
-            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
+            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-4 sm:p-5">
               <p class="font-display font-bold text-sm text-navy mb-4">Tren skrining mandiri</p>
-              <canvas id="trendChart" height="180"></canvas>
+              <div class="relative w-full h-[180px]">
+                <canvas id="trendChart"></canvas>
+              </div>
             </div>
           </div>
 
           <!-- appointments + queue mini -->
           <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 overflow-hidden">
-              <div class="flex items-center justify-between p-5 pb-3">
+            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 overflow-hidden flex flex-col">
+              <div class="flex items-center justify-between p-4 sm:p-5 pb-3">
                 <p class="font-display font-bold text-sm text-navy">Janji temu hari ini</p>
-                <button @click="tab='appointments'" class="text-xs font-semibold text-teal-600">Lihat semua</button>
+                <button @click="tab='appointments'" class="text-xs font-semibold text-teal-600 hover:underline">Lihat semua</button>
               </div>
-              <table class="w-full text-sm">
-                <thead><tr class="text-left text-[11px] text-navy-300 border-t border-navy-100">
-                  <th class="font-medium px-5 py-2">Kode</th><th class="font-medium px-2 py-2">Layanan</th><th class="font-medium px-2 py-2">Fasilitas</th><th class="font-medium px-5 py-2 text-right">Waktu</th>
-                </tr></thead>
-                <tbody>
-                  <template x-for="a in filteredAppointments.slice(0,5)" :key="a.code">
-                    <tr class="border-t border-navy-50">
-                      <td class="px-5 py-2.5 font-mono text-xs text-navy font-semibold" x-text="a.code"></td>
-                      <td class="px-2 py-2.5 text-navy-500" x-text="a.service"></td>
-                      <td class="px-2 py-2.5 text-navy-400 text-xs" x-text="a.facility"></td>
-                      <td class="px-5 py-2.5 text-right text-navy-400 text-xs" x-text="a.time"></td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
+              <div class="overflow-x-auto touch-scrolling">
+                <table class="w-full text-sm min-w-[450px]">
+                  <thead><tr class="text-left text-[11px] text-navy-300 border-t border-navy-100 bg-canvas/50">
+                    <th class="font-medium px-4 sm:px-5 py-2">Kode</th>
+                    <th class="font-medium px-2 py-2">Layanan</th>
+                    <th class="font-medium px-2 py-2">Fasilitas</th>
+                    <th class="font-medium px-4 sm:px-5 py-2 text-right">Waktu</th>
+                  </tr></thead>
+                  <tbody>
+                    <template x-for="a in filteredAppointments.slice(0,5)" :key="a.code">
+                      <tr class="border-t border-navy-50">
+                        <td class="px-4 sm:px-5 py-2.5 font-mono text-xs text-navy font-semibold" x-text="a.code"></td>
+                        <td class="px-2 py-2.5 text-navy-500 text-xs sm:text-sm" x-text="a.service"></td>
+                        <td class="px-2 py-2.5 text-navy-400 text-xs truncate max-w-[120px]" x-text="a.facility"></td>
+                        <td class="px-4 sm:px-5 py-2.5 text-right text-navy-400 text-xs whitespace-nowrap" x-text="a.time"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
-              <p class="font-display font-bold text-sm text-navy mb-4">SLA respons konselor</p>
-              <div class="flex items-end gap-4 mb-3">
-                <p class="font-display font-extrabold text-3xl text-navy">11<span class="text-base font-semibold text-navy-300"> mnt</span></p>
-                <span class="text-xs text-teal-600 font-semibold mb-1.5">target &lt;15 mnt ✓</span>
+            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-4 sm:p-5 flex flex-col justify-between">
+              <div>
+                <p class="font-display font-bold text-sm text-navy mb-3">SLA respons konselor</p>
+                <div class="flex items-end gap-3 mb-4">
+                  <p class="font-display font-extrabold text-3xl text-navy">11<span class="text-base font-semibold text-navy-300"> mnt</span></p>
+                  <span class="text-xs text-teal-600 font-semibold mb-1">target &lt;15 mnt ✓</span>
+                </div>
               </div>
               <div class="space-y-2">
                 <template x-for="c in consultQueue.slice(0,3)" :key="c.name">
-                  <div class="flex items-center gap-2.5 text-xs">
+                  <div class="flex items-center gap-2.5 text-xs bg-canvas/50 p-2 rounded-lg">
                     <span class="w-2 h-2 rounded-full shrink-0" :class="c.status==='Menunggu'?'bg-coral-500':'bg-teal-500'"></span>
-                    <span class="text-navy-500 flex-1" x-text="c.name"></span>
-                    <span class="text-navy-300" x-text="c.status"></span>
+                    <span class="text-navy-500 flex-1 truncate" x-text="c.name"></span>
+                    <span class="text-navy-400 text-[11px]" x-text="c.status"></span>
                   </div>
                 </template>
               </div>
@@ -226,35 +279,45 @@
       <!-- ============ APPOINTMENTS ============ -->
       <template x-if="tab==='appointments'">
         <div class="space-y-4" x-cloak>
-          <div class="flex items-center gap-2 flex-wrap">
+          <!-- Horizontal Scrollable Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 touch-scrolling scrollbar-none">
             <template x-for="f in ['Semua','Tes HIV','Pemeriksaan IMS','PrEP/PEP','Ambil ARV']">
-              <button @click="apptFilter=f" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition" :class="apptFilter===f ? 'bg-navy text-white border-navy' : 'bg-white text-navy-400 border-navy-100 hover:bg-canvas'" x-text="f"></button>
+              <button @click="apptFilter=f" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition whitespace-nowrap shrink-0" :class="apptFilter===f ? 'bg-navy text-white border-navy' : 'bg-white text-navy-400 border-navy-100 hover:bg-canvas'" x-text="f"></button>
             </template>
           </div>
-          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden">
-            <table class="w-full text-sm">
-              <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
-                <th class="font-medium px-5 py-3">Kode Janji</th><th class="font-medium px-3 py-3">Layanan</th><th class="font-medium px-3 py-3">Fasilitas</th><th class="font-medium px-3 py-3">Jadwal</th><th class="font-medium px-3 py-3">Status</th><th class="font-medium px-5 py-3 text-right">Aksi</th>
-              </tr></thead>
-              <tbody>
-                <template x-for="a in filteredAppointments" :key="a.code">
-                  <tr class="border-t border-navy-50 hover:bg-canvas/60">
-                    <td class="px-5 py-3 font-mono text-xs font-semibold text-navy" x-text="a.code"></td>
-                    <td class="px-3 py-3 text-navy-500" x-text="a.service"></td>
-                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="a.facility"></td>
-                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="a.time"></td>
-                    <td class="px-3 py-3">
-                      <span class="text-[11px] font-semibold px-2 py-1 rounded-full"
-                        :class="a.statusColor" x-text="a.status"></span>
-                    </td>
-                    <td class="px-5 py-3 text-right"><button class="text-navy-300 hover:text-navy"><i class="fa-solid fa-ellipsis"></i></button></td>
+
+          <!-- Responsive Table Container -->
+          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto touch-scrolling">
+              <table class="w-full text-sm min-w-[640px]">
+                <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+                  <th class="font-medium px-4 sm:px-5 py-3">Kode Janji</th>
+                  <th class="font-medium px-3 py-3">Layanan</th>
+                  <th class="font-medium px-3 py-3">Fasilitas</th>
+                  <th class="font-medium px-3 py-3">Jadwal</th>
+                  <th class="font-medium px-3 py-3">Status</th>
+                  <th class="font-medium px-4 sm:px-5 py-3 text-right">Aksi</th>
+                </tr></thead>
+                <tbody>
+                  <template x-for="a in filteredAppointments" :key="a.code">
+                    <tr class="border-t border-navy-50 hover:bg-canvas/60">
+                      <td class="px-4 sm:px-5 py-3 font-mono text-xs font-semibold text-navy" x-text="a.code"></td>
+                      <td class="px-3 py-3 text-navy-500" x-text="a.service"></td>
+                      <td class="px-3 py-3 text-navy-400 text-xs" x-text="a.facility"></td>
+                      <td class="px-3 py-3 text-navy-400 text-xs whitespace-nowrap" x-text="a.time"></td>
+                      <td class="px-3 py-3">
+                        <span class="text-[11px] font-semibold px-2 py-1 rounded-full whitespace-nowrap"
+                          :class="a.statusColor" x-text="a.status"></span>
+                      </td>
+                      <td class="px-4 sm:px-5 py-3 text-right"><button class="text-navy-300 hover:text-navy p-1"><i class="fa-solid fa-ellipsis"></i></button></td>
+                    </tr>
+                  </template>
+                  <tr x-show="filteredAppointments.length === 0">
+                    <td colspan="6" class="text-center py-8 text-xs text-navy-300">Tidak ada data janji temu yang cocok.</td>
                   </tr>
-                </template>
-                <tr x-show="filteredAppointments.length === 0">
-                  <td colspan="6" class="text-center py-6 text-xs text-navy-300">Tidak ada data janji temu yang cocok.</td>
-                </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </template>
@@ -262,14 +325,15 @@
       <!-- ============ CONSULT QUEUE ============ -->
       <template x-if="tab==='consult'">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" x-cloak>
-          <div class="lg:col-span-1 bg-white rounded-xl border border-navy-100 overflow-hidden">
-            <p class="font-display font-bold text-sm text-navy p-4 pb-2">Antrean</p>
-            <div class="divide-y divide-navy-50">
+          <!-- Antrean List (Desktop & Mobile) -->
+          <div class="lg:col-span-1 bg-white rounded-xl border border-navy-100 overflow-hidden flex flex-col max-h-[300px] lg:max-h-none">
+            <p class="font-display font-bold text-sm text-navy p-4 pb-2 border-b border-navy-50 lg:border-none">Antrean</p>
+            <div class="divide-y divide-navy-50 overflow-y-auto touch-scrolling flex-1">
               <template x-for="c in consultQueue" :key="c.name">
-                <button @click="activeChat=c" class="w-full text-left p-4 flex items-center gap-3 hover:bg-canvas/60 transition" :class="activeChat.name===c.name && 'bg-teal-50'">
-                  <div class="w-9 h-9 rounded-full bg-navy-100 text-navy-500 flex items-center justify-center text-xs font-bold" x-text="c.name.split(' ')[2] ? c.name.split(' ')[2][0] : 'U'"></div>
+                <button @click="activeChat=c" class="w-full text-left p-3.5 sm:p-4 flex items-center gap-3 hover:bg-canvas/60 transition" :class="activeChat.name===c.name && 'bg-teal-50/80'">
+                  <div class="w-9 h-9 rounded-full bg-navy-100 text-navy-500 flex items-center justify-center text-xs font-bold shrink-0" x-text="c.name.split(' ')[2] ? c.name.split(' ')[2][0] : 'U'"></div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-navy truncate" x-text="c.name"></p>
+                    <p class="text-xs sm:text-sm font-semibold text-navy truncate" x-text="c.name"></p>
                     <p class="text-[11px] text-navy-400 truncate" x-text="c.last"></p>
                   </div>
                   <span class="w-2 h-2 rounded-full shrink-0" :class="c.status==='Menunggu'?'bg-coral-500':'bg-teal-500'"></span>
@@ -277,25 +341,28 @@
               </template>
             </div>
           </div>
-          <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5 flex flex-col h-[500px]">
-            <div class="flex items-center justify-between pb-3 border-b border-navy-50 mb-4">
-              <div>
-                <p class="font-display font-bold text-sm text-navy" x-text="activeChat.name"></p>
-                <p class="text-[11px] text-navy-400">Konselor bertugas: <span class="font-semibold text-navy-500" x-text="activeChat.counselor || 'Maya R.'"></span></p>
+
+          <!-- Chat Box -->
+          <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-4 sm:p-5 flex flex-col h-[480px] sm:h-[520px]">
+            <div class="flex items-center justify-between pb-3 border-b border-navy-50 mb-3 sm:mb-4">
+              <div class="min-w-0 pr-2">
+                <p class="font-display font-bold text-xs sm:text-sm text-navy truncate" x-text="activeChat.name"></p>
+                <p class="text-[10px] sm:text-[11px] text-navy-400 truncate">Konselor: <span class="font-semibold text-navy-500" x-text="activeChat.counselor || 'Maya R.'"></span></p>
               </div>
-              <button @click="alert('Sesi konsultasi dialihkan ke tim tanggap darurat.')" class="text-xs font-semibold text-coral-600 border border-coral-100 bg-coral-50 hover:bg-coral-100 rounded-lg px-3 py-1.5 transition"><i class="fa-solid fa-flag mr-1"></i>Eskalasi</button>
+              <button @click="alert('Sesi konsultasi dialihkan ke tim tanggap darurat.')" class="text-xs font-semibold text-coral-600 border border-coral-100 bg-coral-50 hover:bg-coral-100 rounded-lg px-2.5 py-1.5 transition shrink-0"><i class="fa-solid fa-flag sm:mr-1"></i><span class="hidden sm:inline">Eskalasi</span></button>
             </div>
             
-            <!-- Chat Box Dynamic -->
-            <div class="space-y-3 flex-1 text-sm overflow-y-auto pr-2">
+            <!-- Chat Box Messages -->
+            <div class="space-y-3 flex-1 text-xs sm:text-sm overflow-y-auto pr-1 touch-scrolling">
               <template x-for="msg in activeChat.messages" :key="msg.id">
-                <div :class="msg.from === 'user' ? 'max-w-[75%] bg-canvas rounded-xl rounded-tl-sm px-3.5 py-2.5 text-navy-500' : 'max-w-[75%] ml-auto bg-teal-500 text-white rounded-xl rounded-tr-sm px-3.5 py-2.5'" x-text="msg.text"></div>
+                <div :class="msg.from === 'user' ? 'max-w-[85%] sm:max-w-[75%] bg-canvas rounded-xl rounded-tl-sm px-3.5 py-2.5 text-navy-500' : 'max-w-[85%] sm:max-w-[75%] ml-auto bg-teal-500 text-white rounded-xl rounded-tr-sm px-3.5 py-2.5'" x-text="msg.text"></div>
               </template>
             </div>
 
-            <form @submit.prevent="sendMessage()" class="flex items-center gap-2 pt-4 border-t border-navy-50 mt-4">
-              <input type="text" x-model="newMessage" placeholder="Balas sebagai konselor…" class="flex-1 bg-canvas rounded-full px-4 py-2.5 text-sm outline-none border border-navy-100 focus:border-teal-500">
-              <button type="submit" class="w-9 h-9 rounded-full bg-teal-500 hover:bg-teal-600 text-white flex items-center justify-center transition"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+            <!-- Chat Input -->
+            <form @submit.prevent="sendMessage()" class="flex items-center gap-2 pt-3 border-t border-navy-50 mt-3">
+              <input type="text" x-model="newMessage" placeholder="Balas sebagai konselor…" class="flex-1 bg-canvas rounded-full px-4 py-2 text-xs sm:text-sm outline-none border border-navy-100 focus:border-teal-500">
+              <button type="submit" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-teal-500 hover:bg-teal-600 text-white flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-xs"></i></button>
             </form>
           </div>
         </div>
@@ -303,34 +370,40 @@
 
       <!-- ============ REFERRALS ============ -->
       <template x-if="tab==='referrals'">
-        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden" x-cloak>
-          <table class="w-full text-sm">
-            <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
-              <th class="font-medium px-5 py-3">Fasilitas</th><th class="font-medium px-3 py-3">Layanan</th><th class="font-medium px-3 py-3">Jam</th><th class="font-medium px-3 py-3">Verifikasi</th><th class="font-medium px-3 py-3">Diperbarui</th>
-            </tr></thead>
-            <tbody>
-              <template x-for="f in facilities" :key="f.name">
-                <tr class="border-t border-navy-50 hover:bg-canvas/60">
-                  <td class="px-5 py-3 font-semibold text-navy" x-text="f.name"></td>
-                  <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.services"></td>
-                  <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.hours"></td>
-                  <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-teal-50 text-teal-600"><i class="fa-solid fa-badge-check mr-1"></i>Terverifikasi</span></td>
-                  <td class="px-3 py-3 text-navy-300 text-xs" x-text="f.updated"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden shadow-sm" x-cloak>
+          <div class="overflow-x-auto touch-scrolling">
+            <table class="w-full text-sm min-w-[550px]">
+              <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+                <th class="font-medium px-4 sm:px-5 py-3">Fasilitas</th>
+                <th class="font-medium px-3 py-3">Layanan</th>
+                <th class="font-medium px-3 py-3">Jam</th>
+                <th class="font-medium px-3 py-3">Verifikasi</th>
+                <th class="font-medium px-3 py-3">Diperbarui</th>
+              </tr></thead>
+              <tbody>
+                <template x-for="f in facilities" :key="f.name">
+                  <tr class="border-t border-navy-50 hover:bg-canvas/60">
+                    <td class="px-4 sm:px-5 py-3 font-semibold text-navy" x-text="f.name"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.services"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs whitespace-nowrap" x-text="f.hours"></td>
+                    <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-teal-50 text-teal-600 whitespace-nowrap"><i class="fa-solid fa-badge-check mr-1"></i>Terverifikasi</span></td>
+                    <td class="px-3 py-3 text-navy-300 text-xs whitespace-nowrap" x-text="f.updated"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
         </div>
       </template>
 
       <!-- ============ CONTENT ============ -->
       <template x-if="tab==='content'">
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" x-cloak>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" x-cloak>
           <template x-for="m in materials" :key="m.title">
             <div class="bg-white rounded-xl border border-navy-100 p-4">
               <div class="flex items-center justify-between mb-3">
-                <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center"><i :class="'fa-solid '+m.icon+' text-xs'"></i></div>
-                <span class="text-[10px] font-semibold px-2 py-1 rounded-full bg-teal-50 text-teal-600">Ditinjau</span>
+                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center"><i :class="'fa-solid '+m.icon+' text-xs'"></i></div>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-600">Ditinjau</span>
               </div>
               <p class="font-display font-bold text-sm text-navy mb-1" x-text="m.title"></p>
               <p class="text-xs text-navy-400 mb-3" x-text="m.meta"></p>
@@ -346,22 +419,55 @@
       <!-- ============ USERS ============ -->
       <template x-if="tab==='users'">
         <div x-cloak class="space-y-4">
-          <div class="bg-amber-50 border border-amber-500/20 rounded-xl px-5 py-3 text-xs text-navy-500 flex items-center gap-2.5">
-            <i class="fa-solid fa-circle-info text-amber-500"></i> Tidak ada nama legal yang disimpan. Semua pengguna diidentifikasi lewat nama samaran dan kode janji.
+          <div class="bg-amber-50 border border-amber-500/20 rounded-xl p-3.5 sm:px-5 sm:py-3 text-xs text-navy-500 flex items-start sm:items-center gap-2.5">
+            <i class="fa-solid fa-circle-info text-amber-500 text-sm shrink-0 mt-0.5 sm:mt-0"></i> 
+            <span>Tidak ada nama legal yang disimpan. Semua pengguna diidentifikasi lewat nama samaran dan kode janji.</span>
           </div>
-          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden">
-            <table class="w-full text-sm">
+          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto touch-scrolling">
+              <table class="w-full text-sm min-w-[550px]">
+                <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+                  <th class="font-medium px-4 sm:px-5 py-3">Nama Samaran</th>
+                  <th class="font-medium px-3 py-3">Sapaan</th>
+                  <th class="font-medium px-3 py-3">Bergabung</th>
+                  <th class="font-medium px-3 py-3">Janji Aktif</th>
+                  <th class="font-medium px-3 py-3">Tahap Cascade</th>
+                </tr></thead>
+                <tbody>
+                  <template x-for="u in filteredUsers" :key="u.name">
+                    <tr class="border-t border-navy-50 hover:bg-canvas/60">
+                      <td class="px-4 sm:px-5 py-3 font-semibold text-navy" x-text="u.name"></td>
+                      <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.greeting"></td>
+                      <td class="px-3 py-3 text-navy-400 text-xs whitespace-nowrap" x-text="u.joined"></td>
+                      <td class="px-3 py-3 text-navy-400 text-xs whitespace-nowrap" x-text="u.appt"></td>
+                      <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-navy-50 text-navy-500 whitespace-nowrap" x-text="u.stage"></span></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ AUDIT ============ -->
+      <template x-if="tab==='audit'">
+        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden shadow-sm" x-cloak>
+          <div class="overflow-x-auto touch-scrolling">
+            <table class="w-full text-sm min-w-[500px]">
               <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
-                <th class="font-medium px-5 py-3">Nama Samaran</th><th class="font-medium px-3 py-3">Sapaan</th><th class="font-medium px-3 py-3">Bergabung</th><th class="font-medium px-3 py-3">Janji Aktif</th><th class="font-medium px-3 py-3">Tahap Cascade</th>
+                <th class="font-medium px-4 sm:px-5 py-3">Waktu</th>
+                <th class="font-medium px-3 py-3">Peran</th>
+                <th class="font-medium px-3 py-3">Aksi</th>
+                <th class="font-medium px-3 py-3">Objek</th>
               </tr></thead>
               <tbody>
-                <template x-for="u in filteredUsers" :key="u.name">
+                <template x-for="l in auditLog" :key="l.time">
                   <tr class="border-t border-navy-50 hover:bg-canvas/60">
-                    <td class="px-5 py-3 font-semibold text-navy" x-text="u.name"></td>
-                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.greeting"></td>
-                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.joined"></td>
-                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.appt"></td>
-                    <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-navy-50 text-navy-500" x-text="u.stage"></span></td>
+                    <td class="px-4 sm:px-5 py-3 text-navy-400 text-xs font-mono whitespace-nowrap" x-text="l.time"></td>
+                    <td class="px-3 py-3 text-navy-500 text-xs whitespace-nowrap" x-text="l.role"></td>
+                    <td class="px-3 py-3 text-navy text-xs font-medium" x-text="l.action"></td>
+                    <td class="px-3 py-3 text-navy-300 text-xs" x-text="l.object"></td>
                   </tr>
                 </template>
               </tbody>
@@ -370,67 +476,48 @@
         </div>
       </template>
 
-      <!-- ============ AUDIT ============ -->
-      <template x-if="tab==='audit'">
-        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden" x-cloak>
-          <table class="w-full text-sm">
-            <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
-              <th class="font-medium px-5 py-3">Waktu</th><th class="font-medium px-3 py-3">Peran</th><th class="font-medium px-3 py-3">Aksi</th><th class="font-medium px-3 py-3">Objek</th>
-            </tr></thead>
-            <tbody>
-              <template x-for="l in auditLog" :key="l.time">
-                <tr class="border-t border-navy-50 hover:bg-canvas/60">
-                  <td class="px-5 py-3 text-navy-400 text-xs font-mono" x-text="l.time"></td>
-                  <td class="px-3 py-3 text-navy-500 text-xs" x-text="l.role"></td>
-                  <td class="px-3 py-3 text-navy text-xs font-medium" x-text="l.action"></td>
-                  <td class="px-3 py-3 text-navy-300 text-xs" x-text="l.object"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </template>
-
       <!-- ============ REPORTS ============ -->
       <template x-if="tab==='reports'">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" x-cloak>
-          <div class="bg-white rounded-xl border border-navy-100 p-5">
+          <div class="bg-white rounded-xl border border-navy-100 p-4 sm:p-5">
             <p class="font-display font-bold text-sm text-navy mb-4">Ukuran keberhasilan</p>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-2.5 sm:gap-3">
               <template x-for="m in successMetrics" :key="m.label">
                 <div class="bg-canvas rounded-lg p-3">
-                  <p class="font-display font-extrabold text-lg text-navy" x-text="m.value"></p>
-                  <p class="text-[11px] text-navy-400" x-text="m.label"></p>
+                  <p class="font-display font-extrabold text-base sm:text-lg text-navy" x-text="m.value"></p>
+                  <p class="text-[10px] sm:text-[11px] text-navy-400 leading-tight" x-text="m.label"></p>
                 </div>
               </template>
             </div>
           </div>
-          <div class="bg-white rounded-xl border border-navy-100 p-5">
+          <div class="bg-white rounded-xl border border-navy-100 p-4 sm:p-5">
             <p class="font-display font-bold text-sm text-navy mb-4">Linkage &amp; retensi ARV (6 bulan)</p>
-            <canvas id="reportChart" height="180"></canvas>
+            <div class="relative w-full h-[200px]">
+              <canvas id="reportChart"></canvas>
+            </div>
           </div>
         </div>
       </template>
 
       <!-- ============ SETTINGS ============ -->
       <template x-if="tab==='settings'">
-        <div class="max-w-xl bg-white rounded-xl border border-navy-100 p-6 space-y-5" x-cloak>
+        <div class="max-w-xl bg-white rounded-xl border border-navy-100 p-4 sm:p-6 space-y-5 shadow-sm" x-cloak>
           <div>
             <p class="font-display font-bold text-sm text-navy mb-1">Bahasa afirmatif</p>
             <p class="text-xs text-navy-400 mb-3">Kelola daftar sapaan yang tersedia untuk pengguna saat pendaftaran.</p>
             <div class="flex flex-wrap gap-2 items-center">
               <template x-for="(g, idx) in greetings" :key="idx">
-                <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500 flex items-center gap-2">
+                <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500 flex items-center gap-2 border border-navy-50">
                   <span x-text="g"></span>
-                  <button @click="greetings.splice(idx,1)" class="hover:text-coral-500">&times;</button>
+                  <button @click="greetings.splice(idx,1)" class="hover:text-coral-500 text-navy-300 font-bold">&times;</button>
                 </span>
               </template>
               
               <div x-data="{ open: false, newG: '' }" class="relative">
-                <button x-show="!open" @click="open = true" class="text-xs text-teal-600 font-semibold px-3 py-1.5">+ Tambah</button>
+                <button x-show="!open" @click="open = true" class="text-xs text-teal-600 font-semibold px-3 py-1.5 hover:underline">+ Tambah</button>
                 <div x-show="open" class="flex gap-1" @click.outside="open = false">
-                  <input type="text" x-model="newG" placeholder="Nama..." class="border rounded px-2 py-1 text-xs outline-none">
-                  <button @click="if(newG) { greetings.push(newG); newG=''; open=false; }" class="bg-teal-500 text-white px-2 py-1 rounded text-xs">Simpan</button>
+                  <input type="text" x-model="newG" placeholder="Nama..." class="border border-navy-100 rounded px-2 py-1 text-xs outline-none focus:border-teal-500">
+                  <button @click="if(newG) { greetings.push(newG); newG=''; open=false; }" class="bg-teal-500 text-white px-2.5 py-1 rounded text-xs">Simpan</button>
                 </div>
               </div>
 
@@ -439,7 +526,7 @@
           <div class="pt-5 border-t border-navy-50">
             <p class="font-display font-bold text-sm text-navy mb-1">Retensi data lokal</p>
             <p class="text-xs text-navy-400 mb-3">Berapa lama data sesi disimpan di perangkat pengguna sebelum dihapus otomatis.</p>
-            <select class="border border-navy-100 rounded-lg px-3 py-2 text-sm w-48 outline-none focus:border-teal-500">
+            <select class="border border-navy-100 rounded-lg px-3 py-2 text-sm w-full sm:w-48 outline-none focus:border-teal-500 bg-white">
               <option>7 hari</option><option>14 hari</option><option>30 hari</option>
             </select>
           </div>
@@ -454,6 +541,8 @@
 function dash(){
   return {
     tab: 'dashboard',
+    sidebarOpen: false,
+    mobileSearchOpen: false,
     searchQuery: '',
     apptFilter: 'Semua',
     newMessage: '',
@@ -571,7 +660,7 @@ function dash(){
           type:'line',
           data:{ labels:['M1','M2','M3','M4','M5','M6','M7','M8'],
             datasets:[{ data:[120,150,135,180,210,195,240,268], borderColor:'#0E8478', backgroundColor:'rgba(14,132,120,0.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2.5 }] },
-          options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
         });
       }
     },
@@ -586,7 +675,7 @@ function dash(){
               { label:'Linkage', data:[58,61,65,70,72,75], backgroundColor:'#28A093', borderRadius:4 },
               { label:'Retensi ARV', data:[70,72,74,76,79,78], backgroundColor:'#122844', borderRadius:4 },
             ] },
-          options:{ plugins:{legend:{position:'bottom', labels:{boxWidth:10, font:{size:10}}}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10, font:{size:10}}}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
         });
       }
     }
