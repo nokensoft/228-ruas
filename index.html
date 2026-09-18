@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Noken Sehat — Prototipe Klien</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Noken Sehat</title>
 
 <link rel="icon" type="image/png" sizes="16x16" href="./logo.png">
 
@@ -26,19 +26,21 @@
           sand: { 50:'#FBF6EC', 100:'#F5EBD6', 200:'#EFE2C6' },
           ink: '#1E2A32'
         },
-        fontFamily: { display: ['Manrope','sans-serif'], body: ['Inter','sans-serif'] },
-        boxShadow: { phone: '0 30px 60px -20px rgba(18,40,68,0.35)' }
+        fontFamily: { display: ['Manrope','sans-serif'], body: ['Inter','sans-serif'] }
       }
     }
   }
 </script>
 
-<!-- Alpine.js (Diperbaiki: Dambahkan Alpine.js agar x-data berjalan) -->
+<!-- Alpine.js -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 <style>
   [x-cloak] { display: none !important; }
-  body { font-family: 'Inter', sans-serif; }
+  body { 
+    font-family: 'Inter', sans-serif; 
+    overscroll-behavior-y: none;
+  }
   .font-display { font-family: 'Manrope', sans-serif; }
   .motif::before {
     content: "";
@@ -57,481 +59,448 @@
   .tap:active { transform: scale(0.96); }
 </style>
 </head>
-<body class="bg-sand-100 min-h-screen">
+<body class="bg-sand-50 min-h-screen text-navy antialiased selection:bg-teal-100 select-none">
 
-<div x-data="app()" x-cloak class="min-h-screen flex items-center justify-center p-6 md:p-12 relative overflow-hidden">
+<div x-data="app()" x-cloak class="min-h-screen w-full max-w-md mx-auto relative flex flex-col justify-between overflow-hidden shadow-2xl md:border-x border-sand-200">
 
-  <!-- Background Ambience -->
-  <div class="absolute inset-0 -z-10 bg-gradient-to-br from-sand-50 via-sand-100 to-sand-200"></div>
-  <div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-teal-100/60 blur-3xl -z-10"></div>
-  <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-navy-100/50 blur-3xl -z-10"></div>
+  <!-- Main Screen Container -->
+  <div class="flex-1 overflow-y-auto screen relative flex flex-col">
 
-  <!-- Intro desktop -->
-  <div class="hidden xl:block max-w-xs mr-16">
-    <p class="font-display font-extrabold text-3xl text-navy leading-tight">RUAS</p>
-    <p class="text-teal-600 font-semibold text-sm mb-3">Ruang Aman dan Sehat</p>
-    <p class="text-navy-400 text-sm leading-relaxed">Prototipe interaktif aplikasi <span class="font-semibold text-navy">Noken Sehat</span> — layanan HIV &amp; IMS yang privat dan ramah bagi pekerja seks perempuan serta transpuan di Kota Jayapura.</p>
-    <div class="mt-8 space-y-3 text-sm text-navy-400">
-      <p class="flex items-center gap-2"><i class="fa-solid fa-hand-pointer text-teal-500 w-4"></i> Ketuk untuk menjelajah setiap alur</p>
-      <p class="flex items-center gap-2"><i class="fa-solid fa-lock text-teal-500 w-4"></i> Tanpa identitas asli — semua data contoh</p>
-    </div>
-  </div>
-
-  <!-- Phone Frame -->
-  <div class="relative w-[375px] h-[780px] bg-navy-700 rounded-[46px] shadow-phone p-[10px]">
-    <div class="w-full h-full bg-sand-50 rounded-[38px] overflow-hidden relative flex flex-col">
-
-      <!-- Status Bar -->
-      <div class="flex items-center justify-between px-7 pt-4 pb-1 text-xs font-semibold shrink-0 z-20" :class="screen==='splash' ? 'text-white' : 'text-navy'">
-        <span>9:41</span>
-        <div class="flex items-center gap-1.5">
-          <i class="fa-solid fa-signal text-[11px]"></i>
-          <i class="fa-solid fa-wifi text-[11px]"></i>
-          <i class="fa-solid fa-battery-full text-[13px]"></i>
+    <!-- 1. SPLASH -->
+    <template x-if="screen==='splash'">
+      <div class="h-full min-h-screen bg-navy-600 relative flex flex-col items-center justify-between px-8 py-14 text-center">
+        <div class="absolute inset-0 motif opacity-40"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-[60px] bg-coral-500/90"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 rounded-tr-[50px] bg-teal-600/80"></div>
+        <div></div>
+        <div class="relative z-10">
+          <div class="w-20 h-20 mx-auto rounded-full bg-teal-500/20 border border-teal-300/40 flex items-center justify-center mb-6">
+            <i class="fa-solid fa-heart text-teal-300 text-2xl"></i>
+          </div>
+          <h1 class="font-display font-extrabold text-3xl text-white mb-2">Noken Sehat</h1>
+          <p class="text-sand-100/80 text-sm leading-relaxed max-w-[240px] mx-auto">Ruang aman untuk informasi, tes, konsultasi, dan dukungan terapi.</p>
+        </div>
+        <div class="relative z-10 w-full space-y-3">
+          <button @click="screen='onboard'" class="tap w-full bg-teal-500 hover:bg-teal-400 text-white font-display font-bold text-sm py-4 rounded-2xl shadow-lg shadow-teal-900/30">MULAI DENGAN AMAN</button>
+          <button @click="screen='privacyInfo'" class="tap text-teal-200 text-xs font-semibold underline underline-offset-2">Lihat cara data dilindungi</button>
         </div>
       </div>
+    </template>
 
-      <!-- ===================== SCREENS ===================== -->
-      <div class="flex-1 overflow-y-auto screen relative">
-
-        <!-- 1. SPLASH -->
-        <template x-if="screen==='splash'">
-          <div class="h-full min-h-full bg-navy-600 relative flex flex-col items-center justify-between px-8 py-14 text-center">
-            <div class="absolute inset-0 motif opacity-40"></div>
-            <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-[60px] bg-coral-500/90"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 rounded-tr-[50px] bg-teal-600/80"></div>
-            <div></div>
-            <div class="relative z-10">
-              <div class="w-20 h-20 mx-auto rounded-full bg-teal-500/20 border border-teal-300/40 flex items-center justify-center mb-6">
-                <i class="fa-solid fa-heart text-teal-300 text-2xl"></i>
-              </div>
-              <h1 class="font-display font-extrabold text-3xl text-white mb-2">Noken Sehat</h1>
-              <p class="text-sand-100/80 text-sm leading-relaxed max-w-[240px] mx-auto">Ruang aman untuk informasi, tes, konsultasi, dan dukungan terapi.</p>
-            </div>
-            <div class="relative z-10 w-full space-y-3">
-              <button @click="screen='onboard'" class="tap w-full bg-teal-500 hover:bg-teal-400 text-white font-display font-bold text-sm py-4 rounded-2xl shadow-lg shadow-teal-900/30">MULAI DENGAN AMAN</button>
-              <button @click="screen='privacyInfo'" class="tap text-teal-200 text-xs font-semibold underline underline-offset-2">Lihat cara data dilindungi</button>
-            </div>
+    <!-- 1b. PRIVACY INFO -->
+    <template x-if="screen==='privacyInfo'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3 border-b border-sand-200">
+          <button @click="screen='splash'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Cara data dilindungi</p>
+        </div>
+        <div class="p-5 space-y-4 text-sm flex-1">
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-secret text-xs"></i></div>
+            <p class="text-navy-400 leading-relaxed">Kamu memakai <span class="font-semibold text-navy">nama samaran</span> — tidak ada nama legal yang diminta di awal.</p>
           </div>
-        </template>
-
-        <!-- 1b. PRIVACY INFO -->
-        <template x-if="screen==='privacyInfo'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3 border-b border-sand-200">
-              <button @click="screen='splash'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Cara data dilindungi</p>
-            </div>
-            <div class="p-5 space-y-4 text-sm">
-              <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-secret text-xs"></i></div>
-                <p class="text-navy-400 leading-relaxed">Kamu memakai <span class="font-semibold text-navy">nama samaran</span> — tidak ada nama legal yang diminta di awal.</p>
-              </div>
-              <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-sliders text-xs"></i></div>
-                <p class="text-navy-400 leading-relaxed">Kamu memilih sendiri data apa yang boleh dibagikan ke fasilitas layanan.</p>
-              </div>
-              <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-icons text-xs"></i></div>
-                <p class="text-navy-400 leading-relaxed">Ikon aplikasi netral dan notifikasi disamarkan di layar utama ponsel.</p>
-              </div>
-              <div class="flex gap-3">
-                <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-file-shield text-xs"></i></div>
-                <p class="text-navy-400 leading-relaxed">Akses petugas ke datamu dicatat dan dibatasi sesuai peran mereka.</p>
-              </div>
-            </div>
-            <div class="mt-auto p-5">
-              <button @click="screen='onboard'" class="tap w-full bg-navy text-white font-display font-bold text-sm py-4 rounded-2xl">MENGERTI, LANJUTKAN</button>
-            </div>
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-sliders text-xs"></i></div>
+            <p class="text-navy-400 leading-relaxed">Kamu memilih sendiri data apa yang boleh dibagikan ke fasilitas layanan.</p>
           </div>
-        </template>
-
-        <!-- 2. ONBOARD -->
-        <template x-if="screen==='onboard'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='splash'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Profil aman</p>
-            </div>
-            <div class="px-5 pt-2 pb-6 flex-1">
-              <p class="text-xs font-semibold text-teal-600 tracking-wide mb-1">LANGKAH 1 DARI 1</p>
-              <h2 class="font-display font-extrabold text-xl text-navy mb-6">Bagaimana kami menyapamu?</h2>
-
-              <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Pilih nama samaran</label>
-              <input x-model="profile.name" type="text" class="w-full border border-sand-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none rounded-xl px-4 py-3 text-sm mb-6 bg-sand-50" placeholder="mis. Sari">
-
-              <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Sapaan yang kamu pilih</label>
-              <div class="space-y-2">
-                <template x-for="opt in ['Perempuan','Transpuan','Saya pilih sendiri']" :key="opt">
-                  <button @click="profile.greeting=opt" class="tap w-full text-left px-4 py-3 rounded-xl border text-sm font-medium flex items-center justify-between"
-                    :class="profile.greeting===opt ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-sand-200 text-navy-400'">
-                    <span x-text="opt"></span>
-                    <i class="fa-solid fa-circle-check text-teal-500" x-show="profile.greeting===opt"></i>
-                  </button>
-                </template>
-              </div>
-            </div>
-            <div class="p-5">
-              <button @click="screen='privacySettings'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">LANJUT</button>
-            </div>
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-icons text-xs"></i></div>
+            <p class="text-navy-400 leading-relaxed">Ikon aplikasi netral dan notifikasi disamarkan di layar utama ponsel.</p>
           </div>
-        </template>
-
-        <!-- 3. PRIVACY SETTINGS -->
-        <template x-if="screen==='privacySettings'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='onboard'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Privasi</p>
-            </div>
-            <div class="px-5 pb-6 flex-1">
-              <h2 class="font-display font-extrabold text-lg text-navy mb-1">Cara aplikasi tampil</h2>
-              <p class="text-xs text-navy-400 mb-5">Kamu bisa mengubah ini kapan saja di Pengaturan.</p>
-              <div class="divide-y divide-sand-100 border border-sand-100 rounded-2xl overflow-hidden">
-                <template x-for="item in privacyItems" :key="item.label">
-                  <div class="flex items-center justify-between px-4 py-3.5">
-                    <span class="text-sm text-navy font-medium" x-text="item.label"></span>
-                    <input type="checkbox" class="switch" x-model="item.on">
-                  </div>
-                </template>
-              </div>
-              <div class="mt-4 bg-teal-50 rounded-xl p-3.5 flex gap-2.5">
-                <i class="fa-solid fa-shield-heart text-teal-600 text-sm mt-0.5"></i>
-                <p class="text-xs text-teal-700 leading-relaxed">Tidak ada kata "HIV" atau "ARV" yang akan muncul di ikon atau notifikasi ponselmu.</p>
-              </div>
-            </div>
-            <div class="p-5">
-              <button @click="screen='home'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">SIMPAN PENGATURAN</button>
-            </div>
+          <div class="flex gap-3">
+            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-file-shield text-xs"></i></div>
+            <p class="text-navy-400 leading-relaxed">Akses petugas ke datamu dicatat dan dibatasi sesuai peran mereka.</p>
           </div>
-        </template>
-
-        <!-- 4. HOME -->
-        <template x-if="screen==='home'">
-          <div class="h-full min-h-full bg-sand-50 flex flex-col">
-            <div class="bg-navy-600 px-5 pt-3 pb-8 rounded-b-[28px] relative overflow-hidden">
-              <div class="absolute inset-0 motif opacity-20"></div>
-              <div class="relative flex items-center justify-between mb-5">
-                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-solid fa-bars text-white text-xs"></i></div>
-                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-regular fa-bell text-white text-xs"></i></div>
-              </div>
-              <p class="relative text-sand-100/70 text-xs font-medium">Halo,</p>
-              <h1 class="relative font-display font-extrabold text-2xl text-white" x-text="profile.name || 'Sari'"></h1>
-              <p class="relative text-sand-100/70 text-xs mt-1">Kesehatanmu. Pilihanmu. Privasimu.</p>
-            </div>
-
-            <div class="px-5 -mt-4 relative z-10">
-              <div class="bg-white rounded-2xl shadow-sm border border-sand-100 p-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-coral-100 text-coral-600 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-sm"></i></div>
-                <div class="flex-1">
-                  <p class="text-[11px] text-navy-400 font-medium">Janji berikutnya</p>
-                  <p class="text-sm font-semibold text-navy">Tes HIV • Puskesmas Abepura, 10.00</p>
-                </div>
-                <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
-              </div>
-            </div>
-
-            <div class="px-5 pt-5 pb-24 grid grid-cols-3 gap-3">
-              <template x-for="f in features" :key="f.label">
-                <button @click="goToScreen(f.go)" class="tap flex flex-col items-center gap-2 bg-white border border-sand-100 rounded-2xl py-4 px-1 shadow-sm">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="f.bg">
-                    <i :class="f.icon + ' text-sm ' + f.color"></i>
-                  </div>
-                  <span class="text-[11px] font-semibold text-navy text-center leading-tight" x-text="f.label"></span>
-                </button>
-              </template>
-            </div>
-          </div>
-        </template>
-
-        <!-- 5. EDUKASI LIST -->
-        <template x-if="screen==='edu'">
-          <div class="h-full min-h-full bg-white flex flex-col pb-20">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Belajar</p>
-            </div>
-            <div class="px-5 pb-4">
-              <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-navy-100 text-xs"></i>
-                <input type="text" placeholder="Cari: HIV, IMS, PrEP..." class="w-full bg-sand-50 border border-sand-100 rounded-xl pl-9 pr-4 py-3 text-sm outline-none">
-              </div>
-            </div>
-            <div class="px-5 space-y-2.5 flex-1 overflow-y-auto">
-              <template x-for="m in materials" :key="m.title">
-                <button @click="activeMaterial=m; screen='materi'" class="tap w-full flex items-center gap-3 rounded-xl p-3 text-left" :class="m.hl ? 'bg-coral-100' : 'bg-teal-50'">
-                  <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" :class="m.hl ? 'bg-coral-500' : 'bg-teal-500'">
-                    <i :class="m.icon + ' text-white text-xs'"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-sm font-semibold text-navy" x-text="m.title"></p>
-                    <p class="text-[11px] text-navy-400" x-text="m.meta"></p>
-                  </div>
-                  <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
-                </button>
-              </template>
-            </div>
-          </div>
-        </template>
-
-        <!-- 6. MATERI DETAIL -->
-        <template x-if="screen==='materi'">
-          <div class="h-full min-h-full bg-white flex flex-col pb-6">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='edu'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy" x-text="activeMaterial.title || 'Detail Materi'"></p>
-            </div>
-            <div class="px-5">
-              <div class="bg-teal-50 rounded-2xl p-5 flex flex-col items-center mb-5">
-                <button class="tap w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center mb-2 shadow-md shadow-teal-500/30"><i class="fa-solid fa-play text-sm"></i></button>
-                <p class="text-xs font-semibold text-teal-700">Dengarkan audio 03:40</p>
-              </div>
-              <h3 class="font-display font-bold text-navy text-sm mb-2">Yang penting diketahui</h3>
-              <ul class="space-y-2 mb-5">
-                <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>Tes adalah satu-satunya cara mengetahui status.</li>
-                <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>ARV menjaga kesehatan dan mencegah penularan.</li>
-                <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>Kondom dan pelumas menurunkan risiko.</li>
-              </ul>
-              <p class="text-[11px] text-navy-100 mb-4">Sumber: Kemenkes RI • Ditinjau Jun 2024</p>
-              <button class="tap w-full bg-navy text-white font-display font-bold text-sm py-4 rounded-2xl">COBA KUIS</button>
-            </div>
-          </div>
-        </template>
-
-        <!-- 7. SKRINING -->
-        <template x-if="screen==='screen_q'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Cek kesehatan</p>
-            </div>
-            <div class="px-5 pb-6 flex-1">
-              <p class="text-xs font-semibold text-teal-600 mb-1.5" x-text="'Pertanyaan '+qIndex+' dari '+questions.length"></p>
-              <div class="w-full h-1.5 bg-sand-100 rounded-full mb-6 overflow-hidden">
-                <div class="h-full bg-coral-500 rounded-full transition-all duration-300" :style="'width:'+(qIndex/questions.length*100)+'%'"></div>
-              </div>
-              <h2 class="font-display font-extrabold text-lg text-navy leading-snug mb-6" x-text="questions[qIndex-1]"></h2>
-              <div class="space-y-2.5">
-                <template x-for="opt in ['Ya','Tidak','Saya tidak yakin','Tidak ingin menjawab']" :key="opt">
-                  <button @click="answerQ()" class="tap w-full text-left px-4 py-3.5 rounded-xl border text-sm font-medium"
-                    :class="opt==='Ya' ? 'border-coral-500 bg-coral-100 text-coral-600' : 'border-sand-200 text-navy-400 bg-sand-50'">
-                    <span x-text="opt"></span>
-                  </button>
-                </template>
-              </div>
-              <p class="text-[11px] text-navy-100 flex items-center gap-1.5 mt-5"><i class="fa-solid fa-lock text-[9px]"></i> Jawaban disimpan secara privat. Ini bukan diagnosis.</p>
-            </div>
-          </div>
-        </template>
-
-        <!-- 8. HASIL SKRINING -->
-        <template x-if="screen==='screen_result'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Hasil pribadi</p>
-            </div>
-            <div class="px-5 pb-6 flex-1">
-              <div class="bg-sand-50 border border-sand-100 rounded-2xl p-5 mb-6">
-                <div class="w-10 h-10 rounded-full bg-coral-100 text-coral-500 flex items-center justify-center mb-3"><i class="fa-solid fa-triangle-exclamation text-sm"></i></div>
-                <h2 class="font-display font-extrabold text-navy text-base mb-2">Pemeriksaan disarankan</h2>
-                <p class="text-sm text-navy-400 leading-relaxed">Jawabanmu menunjukkan bahwa tes HIV/IMS dapat membantu memastikan kondisi kesehatan.</p>
-              </div>
-              <div class="space-y-2.5">
-                <button @click="screen='booking'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">BUAT JANJI TES</button>
-                <button @click="screen='chat'" class="tap w-full border border-navy text-navy font-display font-bold text-sm py-4 rounded-2xl">CHAT DENGAN KONSELOR</button>
-                <button class="tap w-full text-teal-600 text-xs font-semibold underline underline-offset-2 pt-1">Lihat tanda bahaya &amp; bantuan segera</button>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- 9. BOOKING -->
-        <template x-if="screen==='booking'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Buat janji</p>
-            </div>
-            <div class="px-5 space-y-2.5 mb-4">
-              <template x-for="s in services" :key="s.title">
-                <button @click="booking.service=s; screen='confirm'" class="tap w-full flex items-center justify-between border border-sand-200 rounded-xl px-4 py-3.5 text-left">
-                  <div>
-                    <p class="text-sm font-semibold text-navy" x-text="s.title"></p>
-                    <p class="text-[11px] text-navy-400" x-text="s.sub"></p>
-                  </div>
-                  <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
-                </button>
-              </template>
-            </div>
-            <div class="mt-auto mx-5 mb-5 bg-teal-50 rounded-xl p-3.5 flex gap-2.5">
-              <i class="fa-solid fa-location-dot text-teal-600 text-sm mt-0.5"></i>
-              <p class="text-xs text-teal-700 leading-relaxed">Lokasi tidak dibagikan otomatis. Kamu memilih fasilitas sendiri.</p>
-            </div>
-          </div>
-        </template>
-
-        <!-- 10. CONFIRM -->
-        <template x-if="screen==='confirm'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='booking'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Konfirmasi</p>
-            </div>
-            <div class="px-5 flex-1">
-              <div class="border border-sand-200 rounded-2xl p-4 mb-4">
-                <p class="text-sm font-semibold text-navy mb-1" x-text="booking.service.title || 'Tes HIV'"></p>
-                <p class="text-xs text-navy-400 mb-3">Puskesmas Abepura</p>
-                <div class="flex items-center gap-4 text-xs text-navy-400">
-                  <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-teal-500"></i> Rabu, 12 Agu</span>
-                  <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-teal-500"></i> 10.00 WIT</span>
-                </div>
-              </div>
-              <div class="bg-sand-50 rounded-xl p-4 text-center mb-4">
-                <p class="text-[11px] text-navy-400 mb-1">Kode janji</p>
-                <p class="font-display font-extrabold text-xl text-navy tracking-wider">JPR–A7K2</p>
-              </div>
-              <p class="text-[11px] text-navy-100">Data dibagikan: kode, jenis layanan, waktu</p>
-            </div>
-            <div class="p-5">
-              <button @click="screen='home'; toast='Janji berhasil dibuat'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">KONFIRMASI</button>
-            </div>
-          </div>
-        </template>
-
-        <!-- 11. CHAT -->
-        <template x-if="screen==='chat'">
-          <div class="h-full min-h-full bg-sand-50 flex flex-col">
-            <div class="px-5 pt-3 pb-3 flex items-center gap-3 bg-white border-b border-sand-100">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold">M</div>
-              <div class="flex-1">
-                <p class="text-sm font-semibold text-navy leading-tight">Konselor Maya</p>
-                <p class="text-[10px] text-teal-600 font-medium">Online • respons ±15 menit</p>
-              </div>
-              <i class="fa-solid fa-badge-check text-teal-500 text-sm"></i>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-3">
-              <div class="max-w-[80%] bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-navy shadow-sm">Terima kasih sudah menghubungi. Apakah ada tanda bahaya atau obat lain yang sedang digunakan?</div>
-              <div class="max-w-[80%] ml-auto bg-teal-500 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm">Halo, saya ingin bertanya tentang efek samping ARV.</div>
-              <template x-if="chatSent">
-                <div class="max-w-[80%] bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-navy shadow-sm">Baik, kami bisa bantu jelaskan lebih lanjut lewat panggilan aman jika kamu mau.</div>
-              </template>
-            </div>
-            <div class="p-3 bg-white border-t border-sand-100">
-              <p class="text-[10px] text-navy-100 text-center mb-2">Bukan layanan gawat darurat • lihat bantuan segera</p>
-              <div class="flex items-center gap-2">
-                <input x-model="chatText" @keydown.enter="sendMessage()" type="text" placeholder="Tulis pesan…" class="flex-1 bg-sand-50 border border-sand-200 rounded-full px-4 py-2.5 text-sm outline-none">
-                <button @click="sendMessage()" class="tap w-9 h-9 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-paper-plane text-xs"></i></button>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- 12. REMINDER -->
-        <template x-if="screen==='reminder'">
-          <div class="h-full min-h-full bg-white flex flex-col">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Pengingat pribadi</p>
-            </div>
-            <div class="px-5 flex-1">
-              <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Waktu pengingat</label>
-              <div class="border border-sand-200 rounded-xl px-4 py-3 mb-4 text-navy font-display font-bold text-lg text-center bg-sand-50">20:00 WIT</div>
-              <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Teks notifikasi</label>
-              <div class="border border-sand-200 rounded-xl px-4 py-3 mb-5 text-sm text-navy bg-sand-50">Waktunya aktivitas Anda</div>
-              <div class="divide-y divide-sand-100 border border-sand-100 rounded-2xl overflow-hidden">
-                <template x-for="item in reminderItems" :key="item.label">
-                  <div class="flex items-center justify-between px-4 py-3.5">
-                    <span class="text-sm text-navy font-medium" x-text="item.label"></span>
-                    <input type="checkbox" class="switch" x-model="item.on">
-                  </div>
-                </template>
-              </div>
-            </div>
-            <div class="p-5">
-              <button @click="screen='home'; toast='Pengingat disimpan'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">SIMPAN PENGINGAT</button>
-            </div>
-          </div>
-        </template>
-
-        <!-- 13. RUJUKAN -->
-        <template x-if="screen==='rujukan'">
-          <div class="h-full min-h-full bg-white flex flex-col pb-20">
-            <div class="px-5 pt-3 pb-4 flex items-center gap-3">
-              <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-              <p class="font-display font-bold text-navy">Layanan dekatmu</p>
-            </div>
-            <div class="mx-5 rounded-2xl h-32 bg-teal-50 border border-teal-100 relative overflow-hidden mb-4 flex items-center justify-center">
-              <div class="absolute inset-0 motif opacity-40"></div>
-              <i class="fa-solid fa-map-location-dot text-teal-400 text-3xl relative"></i>
-              <span class="absolute bottom-2 left-2 text-[10px] bg-white/90 rounded-full px-2.5 py-1 text-teal-700 font-medium">Lokasi hanya digunakan dengan izin</span>
-            </div>
-            <div class="px-5 space-y-2.5 flex-1 overflow-y-auto">
-              <template x-for="fac in facilities" :key="fac.name">
-                <div class="border border-sand-200 rounded-xl p-3.5 flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-lg bg-navy-50 text-navy flex items-center justify-center shrink-0"><i class="fa-solid fa-hospital text-xs"></i></div>
-                  <div class="flex-1">
-                    <p class="text-sm font-semibold text-navy" x-text="fac.name"></p>
-                    <p class="text-[11px] text-navy-400" x-text="fac.services"></p>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-[10px] font-semibold text-teal-600">Buka</p>
-                    <p class="text-[10px] text-navy-100" x-text="fac.dist"></p>
-                  </div>
-                </div>
-              </template>
-            </div>
-          </div>
-        </template>
-
-        <!-- 14. PROFILE -->
-        <template x-if="screen==='profile'">
-          <div class="h-full min-h-full bg-white flex flex-col pb-20">
-            <div class="px-5 pt-4 pb-5 flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center font-display font-bold text-lg" x-text="(profile.name||'Sari')[0]"></div>
-              <div>
-                <p class="font-display font-bold text-navy" x-text="profile.name || 'Sari'"></p>
-                <p class="text-xs text-navy-400" x-text="profile.greeting || 'Perempuan'"></p>
-              </div>
-            </div>
-            <div class="px-5 space-y-2">
-              <template x-for="row in profileMenu" :key="row.label">
-                <button @click="goToScreen(row.go)" class="tap w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-sand-100">
-                  <i :class="'fa-solid '+row.icon+' text-teal-500 w-4 text-sm'"></i>
-                  <span class="text-sm text-navy font-medium flex-1 text-left" x-text="row.label"></span>
-                  <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
-                </button>
-              </template>
-            </div>
-          </div>
-        </template>
-
+        </div>
+        <div class="mt-auto p-5 pb-8">
+          <button @click="screen='onboard'" class="tap w-full bg-navy text-white font-display font-bold text-sm py-4 rounded-2xl">MENGERTI, LANJUTKAN</button>
+        </div>
       </div>
-      <!-- ===================== /SCREENS ===================== -->
+    </template>
 
-      <!-- Bottom Nav -->
-      <template x-if="['home','edu','screen_q','rujukan','profile'].includes(screen)">
-        <div class="shrink-0 bg-white border-t border-sand-100 px-2 py-2 flex items-center justify-around z-20">
-          <template x-for="n in nav" :key="n.label">
-            <button @click="goToScreen(n.go)" class="tap flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl" :class="screen===n.go ? 'text-teal-600' : 'text-navy-100'">
-              <i :class="'fa-solid '+n.icon+' text-base'"></i>
-              <span class="text-[10px] font-semibold" x-text="n.label"></span>
+    <!-- 2. ONBOARD -->
+    <template x-if="screen==='onboard'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='splash'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Profil aman</p>
+        </div>
+        <div class="px-5 pt-2 pb-6 flex-1">
+          <p class="text-xs font-semibold text-teal-600 tracking-wide mb-1">LANGKAH 1 DARI 1</p>
+          <h2 class="font-display font-extrabold text-xl text-navy mb-6">Bagaimana kami menyapamu?</h2>
+
+          <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Pilih nama samaran</label>
+          <input x-model="profile.name" type="text" class="w-full border border-sand-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none rounded-xl px-4 py-3 text-sm mb-6 bg-sand-50" placeholder="mis. Sari">
+
+          <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Sapaan yang kamu pilih</label>
+          <div class="space-y-2">
+            <template x-for="opt in ['Perempuan','Transpuan','Saya pilih sendiri']" :key="opt">
+              <button @click="profile.greeting=opt" class="tap w-full text-left px-4 py-3 rounded-xl border text-sm font-medium flex items-center justify-between"
+                :class="profile.greeting===opt ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-sand-200 text-navy-400'">
+                <span x-text="opt"></span>
+                <i class="fa-solid fa-circle-check text-teal-500" x-show="profile.greeting===opt"></i>
+              </button>
+            </template>
+          </div>
+        </div>
+        <div class="p-5 pb-8">
+          <button @click="screen='privacySettings'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">LANJUT</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- 3. PRIVACY SETTINGS -->
+    <template x-if="screen==='privacySettings'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='onboard'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Privasi</p>
+        </div>
+        <div class="px-5 pb-6 flex-1">
+          <h2 class="font-display font-extrabold text-lg text-navy mb-1">Cara aplikasi tampil</h2>
+          <p class="text-xs text-navy-400 mb-5">Kamu bisa mengubah ini kapan saja di Pengaturan.</p>
+          <div class="divide-y divide-sand-100 border border-sand-100 rounded-2xl overflow-hidden">
+            <template x-for="item in privacyItems" :key="item.label">
+              <div class="flex items-center justify-between px-4 py-3.5">
+                <span class="text-sm text-navy font-medium" x-text="item.label"></span>
+                <input type="checkbox" class="switch" x-model="item.on">
+              </div>
+            </template>
+          </div>
+          <div class="mt-4 bg-teal-50 rounded-xl p-3.5 flex gap-2.5">
+            <i class="fa-solid fa-shield-heart text-teal-600 text-sm mt-0.5"></i>
+            <p class="text-xs text-teal-700 leading-relaxed">Tidak ada kata "HIV" atau "ARV" yang akan muncul di ikon atau notifikasi ponselmu.</p>
+          </div>
+        </div>
+        <div class="p-5 pb-8">
+          <button @click="screen='home'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">SIMPAN PENGATURAN</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- 4. HOME -->
+    <template x-if="screen==='home'">
+      <div class="h-full min-h-screen bg-sand-50 flex flex-col pb-24">
+        <div class="bg-navy-600 px-5 pt-8 pb-10 rounded-b-[28px] relative overflow-hidden">
+          <div class="absolute inset-0 motif opacity-20"></div>
+          <div class="relative flex items-center justify-between mb-5">
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-solid fa-bars text-white text-xs"></i></div>
+            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"><i class="fa-regular fa-bell text-white text-xs"></i></div>
+          </div>
+          <p class="relative text-sand-100/70 text-xs font-medium">Halo,</p>
+          <h1 class="relative font-display font-extrabold text-2xl text-white" x-text="profile.name || 'Sari'"></h1>
+          <p class="relative text-sand-100/70 text-xs mt-1">Kesehatanmu. Pilihanmu. Privasimu.</p>
+        </div>
+
+        <div class="px-5 -mt-6 relative z-10">
+          <div class="bg-white rounded-2xl shadow-sm border border-sand-100 p-4 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-coral-100 text-coral-600 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-sm"></i></div>
+            <div class="flex-1">
+              <p class="text-[11px] text-navy-400 font-medium">Janji berikutnya</p>
+              <p class="text-sm font-semibold text-navy">Tes HIV • Puskesmas Abepura, 10.00</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
+          </div>
+        </div>
+
+        <div class="px-5 pt-6 grid grid-cols-3 gap-3">
+          <template x-for="f in features" :key="f.label">
+            <button @click="goToScreen(f.go)" class="tap flex flex-col items-center gap-2 bg-white border border-sand-100 rounded-2xl py-4 px-1 shadow-sm">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="f.bg">
+                <i :class="f.icon + ' text-sm ' + f.color"></i>
+              </div>
+              <span class="text-[11px] font-semibold text-navy text-center leading-tight" x-text="f.label"></span>
             </button>
           </template>
         </div>
-      </template>
-
-      <!-- Toast Container -->
-      <div x-show="toast" x-transition x-cloak @click.away="toast=''"
-        class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-navy text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 z-50">
-        <i class="fa-solid fa-circle-check text-teal-400"></i> <span x-text="toast"></span>
       </div>
+    </template>
 
-    </div>
-    <!-- Phone Notch -->
-    <div class="absolute top-[10px] left-1/2 -translate-x-1/2 w-32 h-6 bg-navy-700 rounded-b-2xl pointer-events-none z-30"></div>
+    <!-- 5. EDUKASI LIST -->
+    <template x-if="screen==='edu'">
+      <div class="h-full min-h-screen bg-white flex flex-col pb-24 pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Belajar</p>
+        </div>
+        <div class="px-5 pb-4">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-navy-100 text-xs"></i>
+            <input type="text" placeholder="Cari: HIV, IMS, PrEP..." class="w-full bg-sand-50 border border-sand-100 rounded-xl pl-9 pr-4 py-3 text-sm outline-none">
+          </div>
+        </div>
+        <div class="px-5 space-y-2.5 flex-1 overflow-y-auto">
+          <template x-for="m in materials" :key="m.title">
+            <button @click="activeMaterial=m; screen='materi'" class="tap w-full flex items-center gap-3 rounded-xl p-3 text-left" :class="m.hl ? 'bg-coral-100' : 'bg-teal-50'">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" :class="m.hl ? 'bg-coral-500' : 'bg-teal-500'">
+                <i :class="m.icon + ' text-white text-xs'"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-navy" x-text="m.title"></p>
+                <p class="text-[11px] text-navy-400" x-text="m.meta"></p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
+            </button>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- 6. MATERI DETAIL -->
+    <template x-if="screen==='materi'">
+      <div class="h-full min-h-screen bg-white flex flex-col pb-8 pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='edu'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy" x-text="activeMaterial.title || 'Detail Materi'"></p>
+        </div>
+        <div class="px-5 flex-1">
+          <div class="bg-teal-50 rounded-2xl p-5 flex flex-col items-center mb-5">
+            <button class="tap w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center mb-2 shadow-md shadow-teal-500/30"><i class="fa-solid fa-play text-sm"></i></button>
+            <p class="text-xs font-semibold text-teal-700">Dengarkan audio 03:40</p>
+          </div>
+          <h3 class="font-display font-bold text-navy text-sm mb-2">Yang penting diketahui</h3>
+          <ul class="space-y-2 mb-5">
+            <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>Tes adalah satu-satunya cara mengetahui status.</li>
+            <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>ARV menjaga kesehatan dan mencegah penularan.</li>
+            <li class="flex gap-2 text-sm text-navy-400"><i class="fa-solid fa-circle text-[4px] text-teal-500 mt-2"></i>Kondom dan pelumas menurunkan risiko.</li>
+          </ul>
+          <p class="text-[11px] text-navy-100 mb-6">Sumber: Kemenkes RI • Ditinjau Jun 2024</p>
+        </div>
+        <div class="px-5">
+          <button class="tap w-full bg-navy text-white font-display font-bold text-sm py-4 rounded-2xl">COBA KUIS</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- 7. SKRINING -->
+    <template x-if="screen==='screen_q'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Cek kesehatan</p>
+        </div>
+        <div class="px-5 pb-6 flex-1">
+          <p class="text-xs font-semibold text-teal-600 mb-1.5" x-text="'Pertanyaan '+qIndex+' dari '+questions.length"></p>
+          <div class="w-full h-1.5 bg-sand-100 rounded-full mb-6 overflow-hidden">
+            <div class="h-full bg-coral-500 rounded-full transition-all duration-300" :style="'width:'+(qIndex/questions.length*100)+'%'"></div>
+          </div>
+          <h2 class="font-display font-extrabold text-lg text-navy leading-snug mb-6" x-text="questions[qIndex-1]"></h2>
+          <div class="space-y-2.5">
+            <template x-for="opt in ['Ya','Tidak','Saya tidak yakin','Tidak ingin menjawab']" :key="opt">
+              <button @click="answerQ()" class="tap w-full text-left px-4 py-3.5 rounded-xl border text-sm font-medium"
+                :class="opt==='Ya' ? 'border-coral-500 bg-coral-100 text-coral-600' : 'border-sand-200 text-navy-400 bg-sand-50'">
+                <span x-text="opt"></span>
+              </button>
+            </template>
+          </div>
+          <p class="text-[11px] text-navy-100 flex items-center gap-1.5 mt-5"><i class="fa-solid fa-lock text-[9px]"></i> Jawaban disimpan secara privat. Ini bukan diagnosis.</p>
+        </div>
+      </div>
+    </template>
+
+    <!-- 8. HASIL SKRINING -->
+    <template x-if="screen==='screen_result'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Hasil pribadi</p>
+        </div>
+        <div class="px-5 pb-6 flex-1">
+          <div class="bg-sand-50 border border-sand-100 rounded-2xl p-5 mb-6">
+            <div class="w-10 h-10 rounded-full bg-coral-100 text-coral-500 flex items-center justify-center mb-3"><i class="fa-solid fa-triangle-exclamation text-sm"></i></div>
+            <h2 class="font-display font-extrabold text-navy text-base mb-2">Pemeriksaan disarankan</h2>
+            <p class="text-sm text-navy-400 leading-relaxed">Jawabanmu menunjukkan bahwa tes HIV/IMS dapat membantu memastikan kondisi kesehatan.</p>
+          </div>
+          <div class="space-y-2.5">
+            <button @click="screen='booking'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">BUAT JANJI TES</button>
+            <button @click="screen='chat'" class="tap w-full border border-navy text-navy font-display font-bold text-sm py-4 rounded-2xl">CHAT DENGAN KONSELOR</button>
+            <button class="tap w-full text-teal-600 text-xs font-semibold underline underline-offset-2 pt-1">Lihat tanda bahaya &amp; bantuan segera</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- 9. BOOKING -->
+    <template x-if="screen==='booking'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Buat janji</p>
+        </div>
+        <div class="px-5 space-y-2.5 mb-4">
+          <template x-for="s in services" :key="s.title">
+            <button @click="booking.service=s; screen='confirm'" class="tap w-full flex items-center justify-between border border-sand-200 rounded-xl px-4 py-3.5 text-left">
+              <div>
+                <p class="text-sm font-semibold text-navy" x-text="s.title"></p>
+                <p class="text-[11px] text-navy-400" x-text="s.sub"></p>
+              </div>
+              <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
+            </button>
+          </template>
+        </div>
+        <div class="mt-auto mx-5 mb-8 bg-teal-50 rounded-xl p-3.5 flex gap-2.5">
+          <i class="fa-solid fa-location-dot text-teal-600 text-sm mt-0.5"></i>
+          <p class="text-xs text-teal-700 leading-relaxed">Lokasi tidak dibagikan otomatis. Kamu memilih fasilitas sendiri.</p>
+        </div>
+      </div>
+    </template>
+
+    <!-- 10. CONFIRM -->
+    <template x-if="screen==='confirm'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='booking'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Konfirmasi</p>
+        </div>
+        <div class="px-5 flex-1">
+          <div class="border border-sand-200 rounded-2xl p-4 mb-4">
+            <p class="text-sm font-semibold text-navy mb-1" x-text="booking.service.title || 'Tes HIV'"></p>
+            <p class="text-xs text-navy-400 mb-3">Puskesmas Abepura</p>
+            <div class="flex items-center gap-4 text-xs text-navy-400">
+              <span class="flex items-center gap-1.5"><i class="fa-regular fa-calendar text-teal-500"></i> Rabu, 12 Agu</span>
+              <span class="flex items-center gap-1.5"><i class="fa-regular fa-clock text-teal-500"></i> 10.00 WIT</span>
+            </div>
+          </div>
+          <div class="bg-sand-50 rounded-xl p-4 text-center mb-4">
+            <p class="text-[11px] text-navy-400 mb-1">Kode janji</p>
+            <p class="font-display font-extrabold text-xl text-navy tracking-wider">JPR–A7K2</p>
+          </div>
+          <p class="text-[11px] text-navy-100">Data dibagikan: kode, jenis layanan, waktu</p>
+        </div>
+        <div class="p-5 pb-8">
+          <button @click="screen='home'; toast='Janji berhasil dibuat'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">KONFIRMASI</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- 11. CHAT -->
+    <template x-if="screen==='chat'">
+      <div class="h-full min-h-screen bg-sand-50 flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-3 flex items-center gap-3 bg-white border-b border-sand-100">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold">M</div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-navy leading-tight">Konselor Maya</p>
+            <p class="text-[10px] text-teal-600 font-medium">Online • respons ±15 menit</p>
+          </div>
+          <i class="fa-solid fa-badge-check text-teal-500 text-sm"></i>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-3">
+          <div class="max-w-[80%] bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-navy shadow-sm">Terima kasih sudah menghubungi. Apakah ada tanda bahaya atau obat lain yang sedang digunakan?</div>
+          <div class="max-w-[80%] ml-auto bg-teal-500 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm">Halo, saya ingin bertanya tentang efek samping ARV.</div>
+          <template x-if="chatSent">
+            <div class="max-w-[80%] bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-navy shadow-sm">Baik, kami bisa bantu jelaskan lebih lanjut lewat panggilan aman jika kamu mau.</div>
+          </template>
+        </div>
+        <div class="p-3 bg-white border-t border-sand-100 pb-6">
+          <p class="text-[10px] text-navy-100 text-center mb-2">Bukan layanan gawat darurat • lihat bantuan segera</p>
+          <div class="flex items-center gap-2">
+            <input x-model="chatText" @keydown.enter="sendMessage()" type="text" placeholder="Tulis pesan…" class="flex-1 bg-sand-50 border border-sand-200 rounded-full px-4 py-2.5 text-sm outline-none">
+            <button @click="sendMessage()" class="tap w-9 h-9 rounded-full bg-teal-500 text-white flex items-center justify-center shrink-0"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- 12. REMINDER -->
+    <template x-if="screen==='reminder'">
+      <div class="h-full min-h-screen bg-white flex flex-col pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Pengingat pribadi</p>
+        </div>
+        <div class="px-5 flex-1">
+          <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Waktu pengingat</label>
+          <div class="border border-sand-200 rounded-xl px-4 py-3 mb-4 text-navy font-display font-bold text-lg text-center bg-sand-50">20:00 WIT</div>
+          <label class="text-xs font-semibold text-navy-400 mb-1.5 block">Teks notifikasi</label>
+          <div class="border border-sand-200 rounded-xl px-4 py-3 mb-5 text-sm text-navy bg-sand-50">Waktunya aktivitas Anda</div>
+          <div class="divide-y divide-sand-100 border border-sand-100 rounded-2xl overflow-hidden">
+            <template x-for="item in reminderItems" :key="item.label">
+              <div class="flex items-center justify-between px-4 py-3.5">
+                <span class="text-sm text-navy font-medium" x-text="item.label"></span>
+                <input type="checkbox" class="switch" x-model="item.on">
+              </div>
+            </template>
+          </div>
+        </div>
+        <div class="p-5 pb-8">
+          <button @click="screen='home'; toast='Pengingat disimpan'" class="tap w-full bg-teal-500 text-white font-display font-bold text-sm py-4 rounded-2xl">SIMPAN PENGINGAT</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- 13. RUJUKAN -->
+    <template x-if="screen==='rujukan'">
+      <div class="h-full min-h-screen bg-white flex flex-col pb-24 pt-4">
+        <div class="px-5 pt-3 pb-4 flex items-center gap-3">
+          <button @click="screen='home'" class="tap w-8 h-8 flex items-center justify-center rounded-full bg-sand-100 text-navy"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <p class="font-display font-bold text-navy">Layanan dekatmu</p>
+        </div>
+        <div class="mx-5 rounded-2xl h-32 bg-teal-50 border border-teal-100 relative overflow-hidden mb-4 flex items-center justify-center shrink-0">
+          <div class="absolute inset-0 motif opacity-40"></div>
+          <i class="fa-solid fa-map-location-dot text-teal-400 text-3xl relative"></i>
+          <span class="absolute bottom-2 left-2 text-[10px] bg-white/90 rounded-full px-2.5 py-1 text-teal-700 font-medium">Lokasi hanya digunakan dengan izin</span>
+        </div>
+        <div class="px-5 space-y-2.5 flex-1 overflow-y-auto">
+          <template x-for="fac in facilities" :key="fac.name">
+            <div class="border border-sand-200 rounded-xl p-3.5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-navy-50 text-navy flex items-center justify-center shrink-0"><i class="fa-solid fa-hospital text-xs"></i></div>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-navy" x-text="fac.name"></p>
+                <p class="text-[11px] text-navy-400" x-text="fac.services"></p>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] font-semibold text-teal-600">Buka</p>
+                <p class="text-[10px] text-navy-100" x-text="fac.dist"></p>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- 14. PROFILE -->
+    <template x-if="screen==='profile'">
+      <div class="h-full min-h-screen bg-white flex flex-col pb-24 pt-4">
+        <div class="px-5 pt-4 pb-5 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center font-display font-bold text-lg" x-text="(profile.name||'Sari')[0]"></div>
+          <div>
+            <p class="font-display font-bold text-navy" x-text="profile.name || 'Sari'"></p>
+            <p class="text-xs text-navy-400" x-text="profile.greeting || 'Perempuan'"></p>
+          </div>
+        </div>
+        <div class="px-5 space-y-2">
+          <template x-for="row in profileMenu" :key="row.label">
+            <button @click="goToScreen(row.go)" class="tap w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-sand-100">
+              <i :class="'fa-solid '+row.icon+' text-teal-500 w-4 text-sm'"></i>
+              <span class="text-sm text-navy font-medium flex-1 text-left" x-text="row.label"></span>
+              <i class="fa-solid fa-chevron-right text-navy-100 text-xs"></i>
+            </button>
+          </template>
+        </div>
+      </div>
+    </template>
+
   </div>
+
+  <!-- Bottom Nav Fixed at Bottom -->
+  <template x-if="['home','edu','screen_q','rujukan','profile'].includes(screen)">
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-sand-100 px-2 py-2.5 flex items-center justify-around z-40">
+      <template x-for="n in nav" :key="n.label">
+        <button @click="goToScreen(n.go)" class="tap flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl" :class="screen===n.go ? 'text-teal-600' : 'text-navy-100'">
+          <i :class="'fa-solid '+n.icon+' text-base'"></i>
+          <span class="text-[10px] font-semibold" x-text="n.label"></span>
+        </button>
+      </template>
+    </div>
+  </template>
+
+  <!-- Toast Notification -->
+  <div x-show="toast" x-transition x-cloak @click.away="toast=''"
+    class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-navy text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 z-50">
+    <i class="fa-solid fa-circle-check text-teal-400"></i> <span x-text="toast"></span>
+  </div>
+
 </div>
 
 <script>
@@ -613,6 +582,7 @@ function app(){
         this.qIndex = 1;
       }
       this.screen = targetScreen;
+      window.scrollTo(0, 0);
     },
     answerQ(){
       if(this.qIndex < this.questions.length){ 
