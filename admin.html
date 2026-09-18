@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUAS Admin — Dashboard Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy: { DEFAULT:'#122844', 50:'#EEF2F6', 100:'#D6DFE9', 300:'#7C93AE', 400:'#3C5476', 500:'#1B3555', 600:'#122844', 700:'#0C1D33', 900:'#081525' },
+          teal: { DEFAULT:'#0E8478', 50:'#E7F5F2', 100:'#CCEAE4', 400:'#28A093', 500:'#0E8478', 600:'#0A695F' },
+          coral: { DEFAULT:'#E2694F', 50:'#FCECE7', 100:'#FBE2DA', 500:'#E2694F', 600:'#C0543D' },
+          amber: { 50:'#FDF3E3', 500:'#D69A2D' },
+          canvas: '#F5F7FA'
+        },
+        fontFamily: { display:['Manrope','sans-serif'], body:['Inter','sans-serif'] }
+      }
+    }
+  }
+</script>
+<style>
+  body{ font-family:'Inter',sans-serif; background:#F5F7FA; }
+  .font-display{ font-family:'Manrope',sans-serif; }
+  [x-cloak]{ display:none !important; }
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:#D6DFE9; border-radius:8px; }
+  .navlink.active{ background:#0E8478; color:white; }
+  .navlink.active i{ color:white; }
+</style>
+</head>
+<body class="text-navy-600" x-data="dash()">
+
+<div class="flex min-h-screen">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="w-64 shrink-0 bg-navy-700 text-white flex flex-col fixed h-screen z-30">
+    <div class="px-5 pt-6 pb-5 flex items-center gap-2.5 border-b border-white/10">
+      <div class="w-9 h-9 rounded-lg bg-teal-500 flex items-center justify-center"><i class="fa-solid fa-heart text-white text-sm"></i></div>
+      <div>
+        <p class="font-display font-extrabold text-sm leading-tight">RUAS Admin</p>
+        <p class="text-[10px] text-navy-300">Program Jayapura</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <p class="text-[10px] font-bold text-navy-300 uppercase tracking-wider px-3 pt-2 pb-1.5">Operasional</p>
+      <template x-for="item in [
+        {id:'dashboard', icon:'fa-gauge-high', label:'Ringkasan'},
+        {id:'appointments', icon:'fa-calendar-days', label:'Janji Temu'},
+        {id:'consult', icon:'fa-comments', label:'Antrean Konsultasi', badge: consultQueue.filter(c=>c.status==='Menunggu').length},
+        {id:'referrals', icon:'fa-hospital', label:'Fasilitas Rujukan'},
+      ]">
+        <button @click="tab=item.id" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5"
+          :class="tab===item.id && 'active'">
+          <i :class="'fa-solid '+item.icon+' w-4 text-xs'"></i>
+          <span class="flex-1 text-left" x-text="item.label"></span>
+          <span x-show="item.badge" x-text="item.badge" class="bg-coral-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"></span>
+        </button>
+      </template>
+
+      <p class="text-[10px] font-bold text-navy-300 uppercase tracking-wider px-3 pt-4 pb-1.5">Konten &amp; Pengguna</p>
+      <template x-for="item in [
+        {id:'content', icon:'fa-book-open', label:'Konten Edukasi'},
+        {id:'users', icon:'fa-users', label:'Pengguna (Pseudonim)'},
+        {id:'audit', icon:'fa-file-shield', label:'Jejak Akses'},
+      ]">
+        <button @click="tab=item.id" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5"
+          :class="tab===item.id && 'active'">
+          <i :class="'fa-solid '+item.icon+' w-4 text-xs'"></i>
+          <span class="flex-1 text-left" x-text="item.label"></span>
+        </button>
+      </template>
+
+      <p class="text-[10px] font-bold text-navy-300 uppercase tracking-wider px-3 pt-4 pb-1.5">Lainnya</p>
+      <button @click="tab='reports'" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5" :class="tab==='reports' && 'active'">
+        <i class="fa-solid fa-chart-line w-4 text-xs"></i><span class="flex-1 text-left">Laporan &amp; Cascade</span>
+      </button>
+      <button @click="tab='settings'" class="navlink w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-navy-100 hover:bg-white/5" :class="tab==='settings' && 'active'">
+        <i class="fa-solid fa-gear w-4 text-xs"></i><span class="flex-1 text-left">Pengaturan</span>
+      </button>
+    </nav>
+
+    <div class="px-4 py-4 border-t border-white/10 flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-xs font-bold">DN</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold truncate">Dinda N.</p>
+        <p class="text-[10px] text-navy-300">Koordinator Program</p>
+      </div>
+      <i class="fa-solid fa-arrow-right-from-bracket text-navy-300 text-xs"></i>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="flex-1 ml-64">
+
+    <!-- Topbar -->
+    <header class="h-16 bg-white border-b border-navy-100 flex items-center justify-between px-8 sticky top-0 z-20">
+      <div>
+        <h1 class="font-display font-bold text-lg text-navy capitalize" x-text="titles[tab]"></h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden md:block">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-navy-300 text-xs"></i>
+          <input type="text" placeholder="Cari kode janji, fasilitas…" class="bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500 w-64">
+        </div>
+        <button class="relative w-9 h-9 rounded-lg bg-canvas flex items-center justify-center"><i class="fa-regular fa-bell text-navy-400 text-sm"></i>
+          <span class="absolute -top-1 -right-1 w-4 h-4 bg-coral-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">3</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="p-8">
+
+      <!-- ============ RINGKASAN / DASHBOARD ============ -->
+      <template x-if="tab==='dashboard'">
+        <div class="space-y-6" x-cloak>
+
+          <!-- Urgent alert -->
+          <div class="bg-coral-50 border border-coral-100 rounded-xl px-5 py-3.5 flex items-center gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-coral-500"></i>
+            <p class="text-sm text-coral-600 flex-1"><span class="font-semibold">2 kasus</span> ditandai jalur darurat (risiko kekerasan/krisis) dalam 24 jam terakhir — identitas tetap anonim, perlu tindak lanjut fasilitas.</p>
+            <button @click="tab='consult'" class="text-xs font-semibold text-coral-600 underline underline-offset-2 shrink-0">Lihat</button>
+          </div>
+
+          <!-- KPI cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <template x-for="k in kpis" :key="k.label">
+              <div class="bg-white rounded-xl border border-navy-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="k.bg"><i :class="'fa-solid '+k.icon+' text-xs '+k.color"></i></div>
+                  <span class="text-[11px] font-semibold flex items-center gap-1" :class="k.up ? 'text-teal-600' : 'text-coral-500'">
+                    <i :class="'fa-solid '+(k.up?'fa-arrow-up':'fa-arrow-down')+' text-[9px]'"></i><span x-text="k.delta"></span>
+                  </span>
+                </div>
+                <p class="font-display font-extrabold text-2xl text-navy" x-text="k.value"></p>
+                <p class="text-xs text-navy-400 mt-0.5" x-text="k.label"></p>
+              </div>
+            </template>
+          </div>
+
+          <!-- Cascade + trend -->
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 p-5">
+              <div class="flex items-center justify-between mb-4">
+                <p class="font-display font-bold text-sm text-navy">HIV Care Cascade — alur pengguna</p>
+                <span class="text-[11px] text-navy-300">30 hari terakhir</span>
+              </div>
+              <div class="space-y-2.5">
+                <template x-for="(s,i) in cascade" :key="s.label">
+                  <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                      <span class="font-semibold text-navy flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-navy-50 text-navy-500 text-[10px] flex items-center justify-center font-bold" x-text="i+1"></span>
+                        <span x-text="s.label"></span>
+                      </span>
+                      <span class="text-navy-400" x-text="s.value.toLocaleString('id-ID')+' pengguna'"></span>
+                    </div>
+                    <div class="w-full h-2.5 bg-canvas rounded-full overflow-hidden">
+                      <div class="h-full rounded-full" :class="i===0?'bg-navy':i===1?'bg-navy-400':i===2?'bg-teal-400':i===3?'bg-teal-500':i===4?'bg-teal-600':'bg-coral-500'" :style="'width:'+(s.value/cascade[0].value*100)+'%'"></div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
+              <p class="font-display font-bold text-sm text-navy mb-4">Tren skrining mandiri</p>
+              <canvas id="trendChart" height="180"></canvas>
+            </div>
+          </div>
+
+          <!-- appointments + queue mini -->
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <div class="lg:col-span-3 bg-white rounded-xl border border-navy-100 overflow-hidden">
+              <div class="flex items-center justify-between p-5 pb-3">
+                <p class="font-display font-bold text-sm text-navy">Janji temu hari ini</p>
+                <button @click="tab='appointments'" class="text-xs font-semibold text-teal-600">Lihat semua</button>
+              </div>
+              <table class="w-full text-sm">
+                <thead><tr class="text-left text-[11px] text-navy-300 border-t border-navy-100">
+                  <th class="font-medium px-5 py-2">Kode</th><th class="font-medium px-2 py-2">Layanan</th><th class="font-medium px-2 py-2">Fasilitas</th><th class="font-medium px-5 py-2 text-right">Waktu</th>
+                </tr></thead>
+                <tbody>
+                  <template x-for="a in appointments.slice(0,5)" :key="a.code">
+                    <tr class="border-t border-navy-50">
+                      <td class="px-5 py-2.5 font-mono text-xs text-navy font-semibold" x-text="a.code"></td>
+                      <td class="px-2 py-2.5 text-navy-500" x-text="a.service"></td>
+                      <td class="px-2 py-2.5 text-navy-400 text-xs" x-text="a.facility"></td>
+                      <td class="px-5 py-2.5 text-right text-navy-400 text-xs" x-text="a.time"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
+              <p class="font-display font-bold text-sm text-navy mb-4">SLA respons konselor</p>
+              <div class="flex items-end gap-4 mb-3">
+                <p class="font-display font-extrabold text-3xl text-navy">11<span class="text-base font-semibold text-navy-300"> mnt</span></p>
+                <span class="text-xs text-teal-600 font-semibold mb-1.5">target &lt;15 mnt ✓</span>
+              </div>
+              <div class="space-y-2">
+                <template x-for="c in consultQueue.slice(0,3)" :key="c.name">
+                  <div class="flex items-center gap-2.5 text-xs">
+                    <span class="w-2 h-2 rounded-full shrink-0" :class="c.status==='Menunggu'?'bg-coral-500':'bg-teal-500'"></span>
+                    <span class="text-navy-500 flex-1" x-text="c.name"></span>
+                    <span class="text-navy-300" x-text="c.status"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ APPOINTMENTS ============ -->
+      <template x-if="tab==='appointments'">
+        <div class="space-y-4" x-cloak>
+          <div class="flex items-center gap-2 flex-wrap">
+            <template x-for="f in ['Semua','Tes HIV','Pemeriksaan IMS','PrEP/PEP','Ambil ARV']">
+              <button @click="apptFilter=f" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border" :class="apptFilter===f ? 'bg-navy text-white border-navy' : 'bg-white text-navy-400 border-navy-100'" x-text="f"></button>
+            </template>
+          </div>
+          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+                <th class="font-medium px-5 py-3">Kode Janji</th><th class="font-medium px-3 py-3">Layanan</th><th class="font-medium px-3 py-3">Fasilitas</th><th class="font-medium px-3 py-3">Jadwal</th><th class="font-medium px-3 py-3">Status</th><th class="font-medium px-5 py-3 text-right">Aksi</th>
+              </tr></thead>
+              <tbody>
+                <template x-for="a in appointments.filter(a=>apptFilter==='Semua'||a.service===apptFilter)" :key="a.code">
+                  <tr class="border-t border-navy-50 hover:bg-canvas/60">
+                    <td class="px-5 py-3 font-mono text-xs font-semibold text-navy" x-text="a.code"></td>
+                    <td class="px-3 py-3 text-navy-500" x-text="a.service"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="a.facility"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="a.time"></td>
+                    <td class="px-3 py-3">
+                      <span class="text-[11px] font-semibold px-2 py-1 rounded-full"
+                        :class="a.statusColor" x-text="a.status"></span>
+                    </td>
+                    <td class="px-5 py-3 text-right"><button class="text-navy-300 hover:text-navy"><i class="fa-solid fa-ellipsis"></i></button></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ CONSULT QUEUE ============ -->
+      <template x-if="tab==='consult'">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" x-cloak>
+          <div class="lg:col-span-1 bg-white rounded-xl border border-navy-100 overflow-hidden">
+            <p class="font-display font-bold text-sm text-navy p-4 pb-2">Antrean</p>
+            <div class="divide-y divide-navy-50">
+              <template x-for="c in consultQueue" :key="c.name">
+                <button @click="activeChat=c" class="w-full text-left p-4 flex items-center gap-3 hover:bg-canvas/60" :class="activeChat.name===c.name && 'bg-teal-50'">
+                  <div class="w-9 h-9 rounded-full bg-navy-100 text-navy-500 flex items-center justify-center text-xs font-bold" x-text="c.name.split(' ')[0][0]"></div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-navy truncate" x-text="c.name"></p>
+                    <p class="text-[11px] text-navy-400 truncate" x-text="c.last"></p>
+                  </div>
+                  <span class="w-2 h-2 rounded-full shrink-0" :class="c.status==='Menunggu'?'bg-coral-500':'bg-teal-500'"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+          <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5 flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-navy-50 mb-4">
+              <div>
+                <p class="font-display font-bold text-sm text-navy" x-text="activeChat.name"></p>
+                <p class="text-[11px] text-navy-400">Konselor bertugas: <span class="font-semibold text-navy-500" x-text="activeChat.counselor || 'Maya R.'"></span></p>
+              </div>
+              <button class="text-xs font-semibold text-coral-600 border border-coral-100 bg-coral-50 rounded-lg px-3 py-1.5"><i class="fa-solid fa-flag mr-1"></i>Eskalasi</button>
+            </div>
+            <div class="space-y-3 flex-1 text-sm">
+              <div class="max-w-[75%] bg-canvas rounded-xl rounded-tl-sm px-3.5 py-2.5 text-navy-500">Halo, saya ingin bertanya tentang efek samping ARV.</div>
+              <div class="max-w-[75%] ml-auto bg-teal-500 text-white rounded-xl rounded-tr-sm px-3.5 py-2.5">Terima kasih sudah menghubungi. Apakah ada tanda bahaya atau obat lain yang sedang digunakan?</div>
+            </div>
+            <div class="flex items-center gap-2 pt-4 border-t border-navy-50 mt-4">
+              <input type="text" placeholder="Balas sebagai konselor…" class="flex-1 bg-canvas rounded-full px-4 py-2.5 text-sm outline-none border border-navy-100">
+              <button class="w-9 h-9 rounded-full bg-teal-500 text-white flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ REFERRALS ============ -->
+      <template x-if="tab==='referrals'">
+        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden" x-cloak>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+              <th class="font-medium px-5 py-3">Fasilitas</th><th class="font-medium px-3 py-3">Layanan</th><th class="font-medium px-3 py-3">Jam</th><th class="font-medium px-3 py-3">Verifikasi</th><th class="font-medium px-3 py-3">Diperbarui</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="f in facilities" :key="f.name">
+                <tr class="border-t border-navy-50">
+                  <td class="px-5 py-3 font-semibold text-navy" x-text="f.name"></td>
+                  <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.services"></td>
+                  <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.hours"></td>
+                  <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-teal-50 text-teal-600"><i class="fa-solid fa-badge-check mr-1"></i>Terverifikasi</span></td>
+                  <td class="px-3 py-3 text-navy-300 text-xs" x-text="f.updated"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
+      <!-- ============ CONTENT ============ -->
+      <template x-if="tab==='content'">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" x-cloak>
+          <template x-for="m in materials" :key="m.title">
+            <div class="bg-white rounded-xl border border-navy-100 p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center"><i :class="'fa-solid '+m.icon+' text-xs'"></i></div>
+                <span class="text-[10px] font-semibold px-2 py-1 rounded-full bg-teal-50 text-teal-600">Ditinjau</span>
+              </div>
+              <p class="font-display font-bold text-sm text-navy mb-1" x-text="m.title"></p>
+              <p class="text-xs text-navy-400 mb-3" x-text="m.meta"></p>
+              <div class="flex items-center justify-between text-[11px] text-navy-300 pt-3 border-t border-navy-50">
+                <span x-text="'Ditinjau '+m.reviewed"></span>
+                <button class="text-teal-600 font-semibold">Edit</button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- ============ USERS ============ -->
+      <template x-if="tab==='users'">
+        <div x-cloak class="space-y-4">
+          <div class="bg-amber-50 border border-amber-500/20 rounded-xl px-5 py-3 text-xs text-navy-500 flex items-center gap-2.5">
+            <i class="fa-solid fa-circle-info text-amber-500"></i> Tidak ada nama legal yang disimpan. Semua pengguna diidentifikasi lewat nama samaran dan kode janji.
+          </div>
+          <div class="bg-white rounded-xl border border-navy-100 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+                <th class="font-medium px-5 py-3">Nama Samaran</th><th class="font-medium px-3 py-3">Sapaan</th><th class="font-medium px-3 py-3">Bergabung</th><th class="font-medium px-3 py-3">Janji Aktif</th><th class="font-medium px-3 py-3">Tahap Cascade</th>
+              </tr></thead>
+              <tbody>
+                <template x-for="u in pseudoUsers" :key="u.name">
+                  <tr class="border-t border-navy-50">
+                    <td class="px-5 py-3 font-semibold text-navy" x-text="u.name"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.greeting"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.joined"></td>
+                    <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.appt"></td>
+                    <td class="px-3 py-3"><span class="text-[11px] font-semibold px-2 py-1 rounded-full bg-navy-50 text-navy-500" x-text="u.stage"></span></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ AUDIT ============ -->
+      <template x-if="tab==='audit'">
+        <div class="bg-white rounded-xl border border-navy-100 overflow-hidden" x-cloak>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-[11px] text-navy-300 bg-canvas">
+              <th class="font-medium px-5 py-3">Waktu</th><th class="font-medium px-3 py-3">Peran</th><th class="font-medium px-3 py-3">Aksi</th><th class="font-medium px-3 py-3">Objek</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="l in auditLog" :key="l.time">
+                <tr class="border-t border-navy-50">
+                  <td class="px-5 py-3 text-navy-400 text-xs font-mono" x-text="l.time"></td>
+                  <td class="px-3 py-3 text-navy-500 text-xs" x-text="l.role"></td>
+                  <td class="px-3 py-3 text-navy text-xs font-medium" x-text="l.action"></td>
+                  <td class="px-3 py-3 text-navy-300 text-xs" x-text="l.object"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
+      <!-- ============ REPORTS ============ -->
+      <template x-if="tab==='reports'">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4" x-cloak>
+          <div class="bg-white rounded-xl border border-navy-100 p-5">
+            <p class="font-display font-bold text-sm text-navy mb-4">Ukuran keberhasilan</p>
+            <div class="grid grid-cols-2 gap-3">
+              <template x-for="m in successMetrics" :key="m.label">
+                <div class="bg-canvas rounded-lg p-3">
+                  <p class="font-display font-extrabold text-lg text-navy" x-text="m.value"></p>
+                  <p class="text-[11px] text-navy-400" x-text="m.label"></p>
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border border-navy-100 p-5">
+            <p class="font-display font-bold text-sm text-navy mb-4">Linkage &amp; retensi ARV (6 bulan)</p>
+            <canvas id="reportChart" height="180"></canvas>
+          </div>
+        </div>
+      </template>
+
+      <!-- ============ SETTINGS ============ -->
+      <template x-if="tab==='settings'">
+        <div class="max-w-xl bg-white rounded-xl border border-navy-100 p-6 space-y-5" x-cloak>
+          <div>
+            <p class="font-display font-bold text-sm text-navy mb-1">Bahasa afirmatif</p>
+            <p class="text-xs text-navy-400 mb-3">Kelola daftar sapaan yang tersedia untuk pengguna saat pendaftaran.</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Perempuan</span>
+              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Transpuan</span>
+              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Saya pilih sendiri</span>
+              <button class="text-xs text-teal-600 font-semibold px-3 py-1.5">+ Tambah</button>
+            </div>
+          </div>
+          <div class="pt-5 border-t border-navy-50">
+            <p class="font-display font-bold text-sm text-navy mb-1">Retensi data lokal</p>
+            <p class="text-xs text-navy-400 mb-3">Berapa lama data sesi disimpan di perangkat pengguna sebelum dihapus otomatis.</p>
+            <select class="border border-navy-100 rounded-lg px-3 py-2 text-sm w-48">
+              <option>7 hari</option><option>14 hari</option><option>30 hari</option>
+            </select>
+          </div>
+        </div>
+      </template>
+
+    </main>
+  </div>
+</div>
+
+<script>
+function dash(){
+  return {
+    tab: 'dashboard',
+    apptFilter: 'Semua',
+    activeChat: {},
+    titles: {
+      dashboard:'Ringkasan Program', appointments:'Janji Temu', consult:'Antrean Konsultasi',
+      referrals:'Fasilitas Rujukan', content:'Konten Edukasi', users:'Pengguna (Pseudonim)',
+      audit:'Jejak Akses', reports:'Laporan & Cascade', settings:'Pengaturan'
+    },
+    kpis: [
+      { label:'Task completion', value:'92%', delta:'+4% bln ini', up:true, icon:'fa-list-check', bg:'bg-teal-50', color:'text-teal-600' },
+      { label:'Skor SUS', value:'81', delta:'+3 pts', up:true, icon:'fa-face-smile', bg:'bg-teal-50', color:'text-teal-600' },
+      { label:'Uptake tes HIV/IMS', value:'64%', delta:'+9% bln ini', up:true, icon:'fa-vial-circle-check', bg:'bg-navy-50', color:'text-navy-500' },
+      { label:'Retensi ARV 6 bln', value:'78%', delta:'-2% bln ini', up:false, icon:'fa-pills', bg:'bg-coral-50', color:'text-coral-500' },
+    ],
+    cascade: [
+      { label:'Kenali — Edukasi', value:2840 },
+      { label:'Nilai — Skrining', value:1960 },
+      { label:'Hubungkan — Reservasi', value:1310 },
+      { label:'Layani — Tes/Konsultasi', value:980 },
+      { label:'Dukung — ARV', value:640 },
+      { label:'Pertahankan — Retensi', value:498 },
+    ],
+    appointments: [
+      { code:'JPR-A7K2', service:'Tes HIV', facility:'Puskesmas Abepura', time:'Hari ini, 10.00', status:'Terkonfirmasi', statusColor:'bg-teal-50 text-teal-600' },
+      { code:'JPR-B3M9', service:'PrEP/PEP', facility:'Puskesmas Jayapura Selatan', time:'Hari ini, 11.30', status:'Menunggu', statusColor:'bg-amber-50 text-amber-500' },
+      { code:'JPR-C1L4', service:'Pemeriksaan IMS', facility:'Mobile VCT Komunitas', time:'Hari ini, 13.00', status:'Terkonfirmasi', statusColor:'bg-teal-50 text-teal-600' },
+      { code:'JPR-D8X0', service:'Ambil ARV', facility:'Puskesmas Abepura', time:'Besok, 09.00', status:'Terkonfirmasi', statusColor:'bg-teal-50 text-teal-600' },
+      { code:'JPR-E2Q7', service:'Tes HIV', facility:'Mobile VCT Komunitas', time:'Besok, 14.00', status:'Dibatalkan', statusColor:'bg-coral-50 text-coral-500' },
+      { code:'JPR-F5R1', service:'PrEP/PEP', facility:'Puskesmas Jayapura Selatan', time:'Kamis, 10.00', status:'Menunggu', statusColor:'bg-amber-50 text-amber-500' },
+    ],
+    consultQueue: [
+      { name:'Pengguna — Melati', last:'Halo, saya ingin bertanya…', status:'Menunggu', counselor:'Maya R.' },
+      { name:'Pengguna — Anggrek', last:'Terima kasih atas infonya', status:'Aktif', counselor:'Dedi S.' },
+      { name:'Pengguna — Kenanga', last:'Apakah bisa dijadwal ulang?', status:'Menunggu', counselor:'Maya R.' },
+      { name:'Pengguna — Dahlia', last:'Baik, saya coba dulu', status:'Aktif', counselor:'Maya R.' },
+    ],
+    facilities: [
+      { name:'Puskesmas Abepura', services:'Tes HIV • IMS • ARV', hours:'08.00–16.00', updated:'2 hari lalu' },
+      { name:'Puskesmas Jayapura Selatan', services:'Tes HIV • Konseling', hours:'08.00–15.00', updated:'5 hari lalu' },
+      { name:'Mobile VCT Komunitas', services:'Jadwal Kamis • Privat', hours:'Kamis, 10.00–14.00', updated:'1 minggu lalu' },
+    ],
+    materials: [
+      { title:'Dasar HIV', meta:'4 menit • audio', icon:'fa-headphones', reviewed:'Jun 2024' },
+      { title:'Kenali gejala IMS', meta:'5 menit • ilustrasi', icon:'fa-image', reviewed:'Mei 2024' },
+      { title:'Kondom & pelumas', meta:'3 menit • panduan', icon:'fa-book', reviewed:'Jul 2024' },
+      { title:'PrEP dan PEP', meta:'6 menit • tanya jawab', icon:'fa-circle-question', reviewed:'Jun 2024' },
+      { title:'ARV & viral load', meta:'5 menit • audio', icon:'fa-headphones', reviewed:'Ags 2024' },
+    ],
+    pseudoUsers: [
+      { name:'Sari', greeting:'Transpuan', joined:'12 Jan 2024', appt:'Tes HIV — Rabu', stage:'Hubungkan' },
+      { name:'Melati', greeting:'Perempuan', joined:'03 Feb 2024', appt:'—', stage:'Nilai' },
+      { name:'Anggrek', greeting:'Transpuan', joined:'21 Feb 2024', appt:'Ambil ARV — Besok', stage:'Pertahankan' },
+      { name:'Kenanga', greeting:'Saya pilih sendiri', joined:'09 Mar 2024', appt:'PrEP — Kamis', stage:'Layani' },
+      { name:'Dahlia', greeting:'Perempuan', joined:'30 Mar 2024', appt:'—', stage:'Kenali' },
+    ],
+    auditLog: [
+      { time:'18 Sep 09:41', role:'Konselor', action:'Membuka riwayat konsultasi', object:'Kode JPR-A7K2' },
+      { time:'18 Sep 09:12', role:'Admin Fasilitas', action:'Mengonfirmasi janji temu', object:'Kode JPR-B3M9' },
+      { time:'18 Sep 08:55', role:'Koordinator', action:'Memperbarui konten edukasi', object:'ARV & viral load' },
+      { time:'17 Sep 17:20', role:'Konselor', action:'Mengeskalasi kasus darurat', object:'Sesi anonim #4471' },
+      { time:'17 Sep 15:03', role:'Admin Fasilitas', action:'Menambahkan fasilitas rujukan', object:'Mobile VCT Komunitas' },
+    ],
+    successMetrics: [
+      { value:'92%', label:'Task completion' },
+      { value:'81', label:'Skor SUS' },
+      { value:'4.3/5', label:'MAUQ' },
+      { value:'+27%', label:'Pengetahuan HIV/IMS' },
+      { value:'-18%', label:'Stigma layanan' },
+      { value:'64%', label:'Uptake tes HIV/IMS' },
+    ],
+    init(){
+      this.activeChat = this.consultQueue[0];
+      this.$nextTick(()=> this.drawCharts());
+      this.$watch('tab', v=>{ if(v==='reports') this.$nextTick(()=> this.drawReportChart()); });
+    },
+    drawCharts(){
+      const ctx = document.getElementById('trendChart');
+      if(ctx){
+        new Chart(ctx, {
+          type:'line',
+          data:{ labels:['M1','M2','M3','M4','M5','M6','M7','M8'],
+            datasets:[{ data:[120,150,135,180,210,195,240,268], borderColor:'#0E8478', backgroundColor:'rgba(14,132,120,0.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2.5 }] },
+          options:{ plugins:{legend:{display:false}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+        });
+      }
+    },
+    drawReportChart(){
+      const ctx = document.getElementById('reportChart');
+      if(ctx && !ctx.dataset.drawn){
+        ctx.dataset.drawn = '1';
+        new Chart(ctx, {
+          type:'bar',
+          data:{ labels:['Apr','Mei','Jun','Jul','Ags','Sep'],
+            datasets:[
+              { label:'Linkage', data:[58,61,65,70,72,75], backgroundColor:'#28A093', borderRadius:4 },
+              { label:'Retensi ARV', data:[70,72,74,76,79,78], backgroundColor:'#122844', borderRadius:4 },
+            ] },
+          options:{ plugins:{legend:{position:'bottom', labels:{boxWidth:10, font:{size:10}}}}, scales:{ y:{ grid:{color:'#EEF2F6'}, ticks:{font:{size:10}} }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+        });
+      }
+    }
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.14.1/cdn.min.js" defer></script>
+</body>
+</html>
