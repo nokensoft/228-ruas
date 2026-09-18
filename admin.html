@@ -93,7 +93,7 @@
         <p class="text-xs font-semibold truncate">Dinda N.</p>
         <p class="text-[10px] text-navy-300">Koordinator Program</p>
       </div>
-      <i class="fa-solid fa-arrow-right-from-bracket text-navy-300 text-xs"></i>
+      <button title="Keluar" class="hover:text-white transition"><i class="fa-solid fa-arrow-right-from-bracket text-navy-300 text-xs"></i></button>
     </div>
   </aside>
 
@@ -108,7 +108,7 @@
       <div class="flex items-center gap-4">
         <div class="relative hidden md:block">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-navy-300 text-xs"></i>
-          <input type="text" placeholder="Cari kode janji, fasilitas…" class="bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500 w-64">
+          <input type="text" x-model="searchQuery" placeholder="Cari kode, fasilitas, nama..." class="bg-canvas border border-navy-100 rounded-lg pl-9 pr-4 py-2 text-sm outline-none focus:border-teal-500 w-64">
         </div>
         <button class="relative w-9 h-9 rounded-lg bg-canvas flex items-center justify-center"><i class="fa-regular fa-bell text-navy-400 text-sm"></i>
           <span class="absolute -top-1 -right-1 w-4 h-4 bg-coral-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">3</span>
@@ -188,7 +188,7 @@
                   <th class="font-medium px-5 py-2">Kode</th><th class="font-medium px-2 py-2">Layanan</th><th class="font-medium px-2 py-2">Fasilitas</th><th class="font-medium px-5 py-2 text-right">Waktu</th>
                 </tr></thead>
                 <tbody>
-                  <template x-for="a in appointments.slice(0,5)" :key="a.code">
+                  <template x-for="a in filteredAppointments.slice(0,5)" :key="a.code">
                     <tr class="border-t border-navy-50">
                       <td class="px-5 py-2.5 font-mono text-xs text-navy font-semibold" x-text="a.code"></td>
                       <td class="px-2 py-2.5 text-navy-500" x-text="a.service"></td>
@@ -225,7 +225,7 @@
         <div class="space-y-4" x-cloak>
           <div class="flex items-center gap-2 flex-wrap">
             <template x-for="f in ['Semua','Tes HIV','Pemeriksaan IMS','PrEP/PEP','Ambil ARV']">
-              <button @click="apptFilter=f" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border" :class="apptFilter===f ? 'bg-navy text-white border-navy' : 'bg-white text-navy-400 border-navy-100'" x-text="f"></button>
+              <button @click="apptFilter=f" class="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition" :class="apptFilter===f ? 'bg-navy text-white border-navy' : 'bg-white text-navy-400 border-navy-100 hover:bg-canvas'" x-text="f"></button>
             </template>
           </div>
           <div class="bg-white rounded-xl border border-navy-100 overflow-hidden">
@@ -234,7 +234,7 @@
                 <th class="font-medium px-5 py-3">Kode Janji</th><th class="font-medium px-3 py-3">Layanan</th><th class="font-medium px-3 py-3">Fasilitas</th><th class="font-medium px-3 py-3">Jadwal</th><th class="font-medium px-3 py-3">Status</th><th class="font-medium px-5 py-3 text-right">Aksi</th>
               </tr></thead>
               <tbody>
-                <template x-for="a in appointments.filter(a=>apptFilter==='Semua'||a.service===apptFilter)" :key="a.code">
+                <template x-for="a in filteredAppointments" :key="a.code">
                   <tr class="border-t border-navy-50 hover:bg-canvas/60">
                     <td class="px-5 py-3 font-mono text-xs font-semibold text-navy" x-text="a.code"></td>
                     <td class="px-3 py-3 text-navy-500" x-text="a.service"></td>
@@ -247,6 +247,9 @@
                     <td class="px-5 py-3 text-right"><button class="text-navy-300 hover:text-navy"><i class="fa-solid fa-ellipsis"></i></button></td>
                   </tr>
                 </template>
+                <tr x-show="filteredAppointments.length === 0">
+                  <td colspan="6" class="text-center py-6 text-xs text-navy-300">Tidak ada data janji temu yang cocok.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -260,8 +263,8 @@
             <p class="font-display font-bold text-sm text-navy p-4 pb-2">Antrean</p>
             <div class="divide-y divide-navy-50">
               <template x-for="c in consultQueue" :key="c.name">
-                <button @click="activeChat=c" class="w-full text-left p-4 flex items-center gap-3 hover:bg-canvas/60" :class="activeChat.name===c.name && 'bg-teal-50'">
-                  <div class="w-9 h-9 rounded-full bg-navy-100 text-navy-500 flex items-center justify-center text-xs font-bold" x-text="c.name.split(' ')[0][0]"></div>
+                <button @click="activeChat=c" class="w-full text-left p-4 flex items-center gap-3 hover:bg-canvas/60 transition" :class="activeChat.name===c.name && 'bg-teal-50'">
+                  <div class="w-9 h-9 rounded-full bg-navy-100 text-navy-500 flex items-center justify-center text-xs font-bold" x-text="c.name.split(' ')[2] ? c.name.split(' ')[2][0] : 'U'"></div>
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-navy truncate" x-text="c.name"></p>
                     <p class="text-[11px] text-navy-400 truncate" x-text="c.last"></p>
@@ -271,22 +274,26 @@
               </template>
             </div>
           </div>
-          <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5 flex flex-col">
+          <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5 flex flex-col h-[500px]">
             <div class="flex items-center justify-between pb-3 border-b border-navy-50 mb-4">
               <div>
                 <p class="font-display font-bold text-sm text-navy" x-text="activeChat.name"></p>
                 <p class="text-[11px] text-navy-400">Konselor bertugas: <span class="font-semibold text-navy-500" x-text="activeChat.counselor || 'Maya R.'"></span></p>
               </div>
-              <button class="text-xs font-semibold text-coral-600 border border-coral-100 bg-coral-50 rounded-lg px-3 py-1.5"><i class="fa-solid fa-flag mr-1"></i>Eskalasi</button>
+              <button @click="alert('Sesi konsultasi dialihkan ke tim tanggap darurat.')" class="text-xs font-semibold text-coral-600 border border-coral-100 bg-coral-50 hover:bg-coral-100 rounded-lg px-3 py-1.5 transition"><i class="fa-solid fa-flag mr-1"></i>Eskalasi</button>
             </div>
-            <div class="space-y-3 flex-1 text-sm">
-              <div class="max-w-[75%] bg-canvas rounded-xl rounded-tl-sm px-3.5 py-2.5 text-navy-500">Halo, saya ingin bertanya tentang efek samping ARV.</div>
-              <div class="max-w-[75%] ml-auto bg-teal-500 text-white rounded-xl rounded-tr-sm px-3.5 py-2.5">Terima kasih sudah menghubungi. Apakah ada tanda bahaya atau obat lain yang sedang digunakan?</div>
+            
+            <!-- Chat Box Dynamic -->
+            <div class="space-y-3 flex-1 text-sm overflow-y-auto pr-2">
+              <template x-for="msg in activeChat.messages" :key="msg.id">
+                <div :class="msg.from === 'user' ? 'max-w-[75%] bg-canvas rounded-xl rounded-tl-sm px-3.5 py-2.5 text-navy-500' : 'max-w-[75%] ml-auto bg-teal-500 text-white rounded-xl rounded-tr-sm px-3.5 py-2.5'" x-text="msg.text"></div>
+              </template>
             </div>
-            <div class="flex items-center gap-2 pt-4 border-t border-navy-50 mt-4">
-              <input type="text" placeholder="Balas sebagai konselor…" class="flex-1 bg-canvas rounded-full px-4 py-2.5 text-sm outline-none border border-navy-100">
-              <button class="w-9 h-9 rounded-full bg-teal-500 text-white flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
-            </div>
+
+            <form @submit.prevent="sendMessage()" class="flex items-center gap-2 pt-4 border-t border-navy-50 mt-4">
+              <input type="text" x-model="newMessage" placeholder="Balas sebagai konselor…" class="flex-1 bg-canvas rounded-full px-4 py-2.5 text-sm outline-none border border-navy-100 focus:border-teal-500">
+              <button type="submit" class="w-9 h-9 rounded-full bg-teal-500 hover:bg-teal-600 text-white flex items-center justify-center transition"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+            </form>
           </div>
         </div>
       </template>
@@ -300,7 +307,7 @@
             </tr></thead>
             <tbody>
               <template x-for="f in facilities" :key="f.name">
-                <tr class="border-t border-navy-50">
+                <tr class="border-t border-navy-50 hover:bg-canvas/60">
                   <td class="px-5 py-3 font-semibold text-navy" x-text="f.name"></td>
                   <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.services"></td>
                   <td class="px-3 py-3 text-navy-400 text-xs" x-text="f.hours"></td>
@@ -326,7 +333,7 @@
               <p class="text-xs text-navy-400 mb-3" x-text="m.meta"></p>
               <div class="flex items-center justify-between text-[11px] text-navy-300 pt-3 border-t border-navy-50">
                 <span x-text="'Ditinjau '+m.reviewed"></span>
-                <button class="text-teal-600 font-semibold">Edit</button>
+                <button class="text-teal-600 font-semibold hover:underline">Edit</button>
               </div>
             </div>
           </template>
@@ -345,8 +352,8 @@
                 <th class="font-medium px-5 py-3">Nama Samaran</th><th class="font-medium px-3 py-3">Sapaan</th><th class="font-medium px-3 py-3">Bergabung</th><th class="font-medium px-3 py-3">Janji Aktif</th><th class="font-medium px-3 py-3">Tahap Cascade</th>
               </tr></thead>
               <tbody>
-                <template x-for="u in pseudoUsers" :key="u.name">
-                  <tr class="border-t border-navy-50">
+                <template x-for="u in filteredUsers" :key="u.name">
+                  <tr class="border-t border-navy-50 hover:bg-canvas/60">
                     <td class="px-5 py-3 font-semibold text-navy" x-text="u.name"></td>
                     <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.greeting"></td>
                     <td class="px-3 py-3 text-navy-400 text-xs" x-text="u.joined"></td>
@@ -369,7 +376,7 @@
             </tr></thead>
             <tbody>
               <template x-for="l in auditLog" :key="l.time">
-                <tr class="border-t border-navy-50">
+                <tr class="border-t border-navy-50 hover:bg-canvas/60">
                   <td class="px-5 py-3 text-navy-400 text-xs font-mono" x-text="l.time"></td>
                   <td class="px-3 py-3 text-navy-500 text-xs" x-text="l.role"></td>
                   <td class="px-3 py-3 text-navy text-xs font-medium" x-text="l.action"></td>
@@ -408,17 +415,28 @@
           <div>
             <p class="font-display font-bold text-sm text-navy mb-1">Bahasa afirmatif</p>
             <p class="text-xs text-navy-400 mb-3">Kelola daftar sapaan yang tersedia untuk pengguna saat pendaftaran.</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Perempuan</span>
-              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Transpuan</span>
-              <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500">Saya pilih sendiri</span>
-              <button class="text-xs text-teal-600 font-semibold px-3 py-1.5">+ Tambah</button>
+            <div class="flex flex-wrap gap-2 items-center">
+              <template x-for="(g, idx) in greetings" :key="idx">
+                <span class="text-xs bg-canvas px-3 py-1.5 rounded-full text-navy-500 flex items-center gap-2">
+                  <span x-text="g"></span>
+                  <button @click="greetings.splice(idx,1)" class="hover:text-coral-500">&times;</button>
+                </span>
+              </template>
+              
+              <div x-data="{ open: false, newG: '' }" class="relative">
+                <button x-show="!open" @click="open = true" class="text-xs text-teal-600 font-semibold px-3 py-1.5">+ Tambah</button>
+                <div x-show="open" class="flex gap-1" @click.outside="open = false">
+                  <input type="text" x-model="newG" placeholder="Nama..." class="border rounded px-2 py-1 text-xs outline-none">
+                  <button @click="if(newG) { greetings.push(newG); newG=''; open=false; }" class="bg-teal-500 text-white px-2 py-1 rounded text-xs">Simpan</button>
+                </div>
+              </div>
+
             </div>
           </div>
           <div class="pt-5 border-t border-navy-50">
             <p class="font-display font-bold text-sm text-navy mb-1">Retensi data lokal</p>
             <p class="text-xs text-navy-400 mb-3">Berapa lama data sesi disimpan di perangkat pengguna sebelum dihapus otomatis.</p>
-            <select class="border border-navy-100 rounded-lg px-3 py-2 text-sm w-48">
+            <select class="border border-navy-100 rounded-lg px-3 py-2 text-sm w-48 outline-none focus:border-teal-500">
               <option>7 hari</option><option>14 hari</option><option>30 hari</option>
             </select>
           </div>
@@ -433,8 +451,10 @@
 function dash(){
   return {
     tab: 'dashboard',
+    searchQuery: '',
     apptFilter: 'Semua',
-    activeChat: {},
+    newMessage: '',
+    greetings: ['Perempuan', 'Transpuan', 'Saya pilih sendiri'],
     titles: {
       dashboard:'Ringkasan Program', appointments:'Janji Temu', consult:'Antrean Konsultasi',
       referrals:'Fasilitas Rujukan', content:'Konten Edukasi', users:'Pengguna (Pseudonim)',
@@ -463,10 +483,10 @@ function dash(){
       { code:'JPR-F5R1', service:'PrEP/PEP', facility:'Puskesmas Jayapura Selatan', time:'Kamis, 10.00', status:'Menunggu', statusColor:'bg-amber-50 text-amber-500' },
     ],
     consultQueue: [
-      { name:'Pengguna — Melati', last:'Halo, saya ingin bertanya…', status:'Menunggu', counselor:'Maya R.' },
-      { name:'Pengguna — Anggrek', last:'Terima kasih atas infonya', status:'Aktif', counselor:'Dedi S.' },
-      { name:'Pengguna — Kenanga', last:'Apakah bisa dijadwal ulang?', status:'Menunggu', counselor:'Maya R.' },
-      { name:'Pengguna — Dahlia', last:'Baik, saya coba dulu', status:'Aktif', counselor:'Maya R.' },
+      { name:'Pengguna — Melati', status:'Menunggu', counselor:'Maya R.', last:'Halo, saya ingin bertanya…', messages:[ {id:1, from:'user', text:'Halo, saya ingin bertanya tentang efek samping ARV.'}, {id:2, from:'counselor', text:'Terima kasih sudah menghubungi. Apakah ada tanda bahaya atau obat lain yang sedang digunakan?'} ] },
+      { name:'Pengguna — Anggrek', status:'Aktif', counselor:'Dedi S.', last:'Terima kasih atas infonya', messages:[ {id:1, from:'user', text:'Apakah obat harus diminum di jam yang sama?'}, {id:2, from:'counselor', text:'Usahakan di jam yang sama setiap harinya.'} ] },
+      { name:'Pengguna — Kenanga', status:'Menunggu', counselor:'Maya R.', last:'Apakah bisa dijadwal ulang?', messages:[ {id:1, from:'user', text:'Apakah bisa dijadwal ulang jam janji temu saya?'} ] },
+      { name:'Pengguna — Dahlia', status:'Aktif', counselor:'Maya R.', last:'Baik, saya coba dulu', messages:[ {id:1, from:'user', text:'Baik, terima kasih penjelasannya.'} ] },
     ],
     facilities: [
       { name:'Puskesmas Abepura', services:'Tes HIV • IMS • ARV', hours:'08.00–16.00', updated:'2 hari lalu' },
@@ -502,14 +522,48 @@ function dash(){
       { value:'-18%', label:'Stigma layanan' },
       { value:'64%', label:'Uptake tes HIV/IMS' },
     ],
+    activeChat: {},
+    
+    get filteredAppointments() {
+      return this.appointments.filter(a => {
+        const matchesCategory = this.apptFilter === 'Semua' || a.service === this.apptFilter;
+        const matchesSearch = a.code.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                              a.facility.toLowerCase().includes(this.searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+    },
+
+    get filteredUsers() {
+      return this.pseudoUsers.filter(u => u.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+    },
+
+    sendMessage() {
+      if(!this.newMessage.trim()) return;
+      if(!this.activeChat.messages) this.activeChat.messages = [];
+      this.activeChat.messages.push({
+        id: Date.now(),
+        from: 'counselor',
+        text: this.newMessage
+      });
+      this.activeChat.last = this.newMessage;
+      this.newMessage = '';
+    },
+
     init(){
       this.activeChat = this.consultQueue[0];
-      this.$nextTick(()=> this.drawCharts());
-      this.$watch('tab', v=>{ if(v==='reports') this.$nextTick(()=> this.drawReportChart()); });
+      this.$nextTick(() => this.drawCharts());
+      
+      this.$watch('tab', v => { 
+        this.$nextTick(() => {
+          if(v === 'dashboard') this.drawCharts();
+          if(v === 'reports') this.drawReportChart(); 
+        });
+      });
     },
+
     drawCharts(){
       const ctx = document.getElementById('trendChart');
-      if(ctx){
+      if(ctx && !Chart.getChart(ctx)){
         new Chart(ctx, {
           type:'line',
           data:{ labels:['M1','M2','M3','M4','M5','M6','M7','M8'],
@@ -518,10 +572,10 @@ function dash(){
         });
       }
     },
+
     drawReportChart(){
       const ctx = document.getElementById('reportChart');
-      if(ctx && !ctx.dataset.drawn){
-        ctx.dataset.drawn = '1';
+      if(ctx && !Chart.getChart(ctx)){
         new Chart(ctx, {
           type:'bar',
           data:{ labels:['Apr','Mei','Jun','Jul','Ags','Sep'],
